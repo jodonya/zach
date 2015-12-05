@@ -6,7 +6,7 @@
 <body>
 <h2>Git Commits</h2>
 
-<!-- h4>Message : ${message}</h1 -->	
+<h4>Welcom : ${email}</h1>	
 <h4> </h4>
 <table>
 	  	<tr>
