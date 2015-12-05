@@ -53,7 +53,8 @@ public class OAuthMainController {
 		//Connecting to Github using the GitHub API
 		GitHub github = null;;
 		try {
-			github = GitHub.connectToEnterprise(apiUrl, oauthAccessToken);
+			//github = GitHub.connectToEnterprise(apiUrl, oauthAccessToken);
+			github = GitHub.connectToEnterprise("", "");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
