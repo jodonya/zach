@@ -4,7 +4,7 @@
 	      http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	      version="2.5">	
 
-	<display-name>Chai-Sacco Portal</display-name>
+	<display-name>Collaboration</display-name>
 	
 	<servlet-mapping>
   <servlet-name>default</servlet-name>

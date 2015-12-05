@@ -39,6 +39,11 @@
 		<script src="assets/js/html5shiv.js"></script>
 		<script src="assets/js/respond.min.js"></script>
 		<![endif]-->
+	<link rel="stylesheet" href="auth-buttons.css">
+
+    <!-- prettyify -->
+    <link rel="stylesheet" href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css">
+    <script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js"></script>
 	</head>
 
 	<body class="login-layout">
@@ -50,10 +55,10 @@
 							<div class="center">
 								<h1>
 									<i class="ace-icon fa fa-leaf green"></i>
-									<span class="red">Chai</span>
-									<span class="white" id="id-text2">Portal</span>
+									<span class="red">Zach</span>
+									<span class="white" id="id-text2">OAuth</span>
 								</h1>
-								<h4 class="blue" id="id-company-text">&copy; Chai Sacco Ltd.</h4>
+								<h4 class="blue" id="id-company-text">&copy; Zach.</h4>
 							</div>
 
 							<div class="space-6"></div>
@@ -63,7 +68,7 @@
 									<div class="widget-body">
 										<div class="widget-main">
 											<h4 class="header blue lighter bigger">
-												<i class="ace-icon fa fa-coffee green"></i>
+												<!-- i class="ace-icon fa fa-coffee green"></i -->
 												Please Login
 											</h4>
 
@@ -88,29 +93,30 @@
 													<div class="space"></div>
 
 													<div class="clearfix">
-														<label class="inline">
+														<!-- label class="inline">
 															<input type="checkbox" class="ace" />
 															<span class="lbl"> Remember Me</span>
-														</label>
+														</label -->
 
 														<!-- button type="button"  class="width-35 pull-right btn btn-sm btn-primary">
 															<i class="ace-icon fa fa-key"></i>
 															<span class="bigger-110">Login</span>
 														</button -->
-														<input type="submit" value="Login" class="width-35 pull-right btn btn-sm btn-primary" />
+														<!-- input type="submit" value="Login" class="width-35 pull-right btn btn-sm btn-primary" / -->
+														<button class="btn-auth btn-github">Sign in with <b>GitHub</b></button></p>
 													</div>
 
 													<div class="space-4"></div>
 												</fieldset>
 											</form:form>
 
-											<div class="social-or-login center">
+											<!-- div class="social-or-login center">
 												<span class="bigger-110">Or Login Using</span>
-											</div>
+											</div -->
 
 											<div class="space-6"></div>
 
-											<div class="social-login center">
+											<!-- div class="social-login center">
 												<a class="btn btn-primary">
 													<i class="ace-icon fa fa-facebook"></i>
 												</a>
@@ -122,10 +128,10 @@
 												<a class="btn btn-danger">
 													<i class="ace-icon fa fa-google-plus"></i>
 												</a>
-											</div>
+											</div -->
 										</div><!-- /.widget-main -->
 
-										<div class="toolbar clearfix">
+										<!-- div class="toolbar clearfix">
 											<div>
 												<a href="#" data-target="#forgot-box" class="forgot-password-link">
 													<i class="ace-icon fa fa-arrow-left"></i>
@@ -139,7 +145,7 @@
 													<i class="ace-icon fa fa-arrow-right"></i>
 												</a>
 											</div>
-										</div>
+										</div -->
 									</div><!-- /.widget-body -->
 								</div><!-- /.login-box -->
 
@@ -261,7 +267,7 @@
 								</div><!-- /.signup-box -->
 							</div><!-- /.position-relative -->
 
-							<div class="navbar-fixed-top align-right">
+							<!-- div class="navbar-fixed-top align-right">
 								<br />
 								&nbsp;
 								<a id="btn-login-dark" href="#">Dark</a>
@@ -274,7 +280,7 @@
 								&nbsp;
 								<a id="btn-login-light" href="#">Light</a>
 								&nbsp; &nbsp; &nbsp;
-							</div>
+							</div -->
 						</div>
 					</div><!-- /.col -->
 				</div><!-- /.row -->
