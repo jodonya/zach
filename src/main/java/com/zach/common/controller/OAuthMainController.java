@@ -11,6 +11,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedIterable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,8 +26,9 @@ import com.zach.model.UserLogin;
  * */
 public class OAuthMainController {
 
-	public static String OAUTHACCESSTOKE = "026aa99777016a7499d3dc76d328b5e58d7213c9";
-
+	@Value("${token}")
+	private String OAUTHACCESSTOKE;
+	
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String main(@ModelAttribute("userLogin") UserLogin userLogin,
 			ModelMap model) {
