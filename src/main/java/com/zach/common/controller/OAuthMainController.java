@@ -48,6 +48,13 @@ public class OAuthMainController {
 		model.addAttribute("email", userLogin.getEmail());
 		System.out.println(" #### the email is " + userLogin.getEmail());
 
+		if ((userLogin.getEmail() == null) || userLogin.getEmail().equals("")) {
+			// Go back to the main page
+			model.addAttribute(new UserLogin());
+			// return "main";
+			return "GitOAuthPage";
+		}
+
 		// Connecting to Github using the GitHub API
 		GitHub github = null;
 		try {

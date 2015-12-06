@@ -343,6 +343,20 @@
 			 });
 			 
 			});
+
+			function validateMail(){
+
+				if ($('#email').value() == '')
+				{
+						alert ('You must provide an email address');
+						return false;
+				} else{
+					alert ('Email OK ');
+					alert ($('#email').value());
+						return true;
+				}
+				
+			}
 		</script>
 	</body>
 </html>
