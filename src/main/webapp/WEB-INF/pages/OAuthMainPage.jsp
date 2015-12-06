@@ -6,30 +6,30 @@
 <body>
 <h2>Git Commits</h2>
 
-<h4>Welcom : ${email}</h1>	
+<h4>Welcome : ${email}</h1>	
 <h4> </h4>
 <table>
 	  	<tr>
     
-     <td><strong>Email</strong></td>
-     <td></td>
-     <td><strong>Commit #.</strong></td>
      <td><strong></strong></td>
-      <td><strong></strong></td>
-      <td><strong></strong></td>
+     <td></td>
+     <td><strong>Commit(Message)</strong></td>
+     <td><strong>Committer</strong></td>
+      <td><strong>Repository</strong></td>
+      <td><strong>Hash</strong></td>
     </tr>
-  <!--c:forEach items="${listTransaction}" var="transaction" -->
+  <c:forEach items="${listTheCommits}" var="commit">
 
     <tr>
-    
-     <td><!-- c:out value="${transaction.createdStamp}" / --></td>
-     <td></td>
-     <td></td>
      <td></td>
       <td></td>
-      <td></td>
+     <td><c:out value="${commit.message}" /></td>
+     <td><c:out value="${commit.login}" /></td>
+     <td><c:out value="${commit.repository}" /></td>
+     <td><c:out value="${commit.hash}" /></td>
+
     </tr>
-  <!-- /c:forEach -->
+  </c:forEach>
 </table>
 </body>
 </html>
