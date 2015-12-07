@@ -180,6 +180,48 @@
 			<version>1.71</version>
 		</dependency>
 		
+		<!-- dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.19</version>
+		</dependency -->
+		<dependency>
+	<groupId>com.sun.jersey</groupId>
+	<artifactId>jersey-server</artifactId>
+	<version>1.19</version>
+	</dependency>
+	<dependency>
+		<groupId>com.sun.jersey</groupId>
+		<artifactId>jersey-client</artifactId>
+		<version>1.19</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpcore</artifactId>
+		<version>4.4-beta1</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.4-beta1</version>
+	</dependency>
+	<dependency>
+		<groupId>org.json</groupId>
+		<artifactId>json</artifactId>
+		<version>20141113</version>
+	</dependency>
+		
+		<!-- dependency>
+		  <groupId>com.jcabi</groupId>
+		  <artifactId>jcabi-github</artifactId>
+		  <version>0.23</version>
+		</dependency -->
+		<!-- dependency>
+			<groupId>org.eclipse.mylyn.github</groupId>
+			<artifactId>org.eclipse.egit.github.core</artifactId>
+			<version>2.1.5</version>
+		</dependency -->
+		
 		
 	</dependencies>
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHCommit.File;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
@@ -19,11 +20,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.zach.common.config.MongoConfiguration;
 import com.zach.model.Commit;
+import com.zach.model.CommitFile;
 import com.zach.model.UserLogin;
 import com.zach.repository.CommitRepository;
 
@@ -35,10 +38,9 @@ public class OAuthMainController {
 
 	@Value("${token}")
 	private String OAUTHACCESSTOKE;
-	
+
 	@Value("${organizationname}")
 	private String ORGANIZATIONNAME;
-
 
 	@Autowired
 	private CommitRepository commitRepository;
@@ -63,16 +65,21 @@ public class OAuthMainController {
 		GitHub github = null;
 		try {
 			github = GitHub.connectUsingOAuth(OAUTHACCESSTOKE);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
+
 		GHOrganization ghOrganization = null;
 		try {
 			ghOrganization = github.getOrganization(ORGANIZATIONNAME);
+
+			// github.getOrganization(ORGANIZATIONNAME);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		// .get(new Coordinates.Simple(ORGANIZATIONNAME)).;
+		//
 		Map<String, GHRepository> mapRepositories = null;
 		try {
 			mapRepositories = ghOrganization.getRepositories();
@@ -88,6 +95,11 @@ public class OAuthMainController {
 				.entrySet()) {
 			System.out.println("Repository ... "
 					+ repository.getValue().getName());
+
+			System.out.println("Home page : "
+					+ repository.getValue().getHomepage());
+			System.out.println("Repo URL : " + repository.getValue().getUrl());
+
 			System.out.println();
 			listCommits = repository.getValue().listCommits().asList();
 			for (GHCommit ghCommit : listCommits) {
@@ -124,16 +136,41 @@ public class OAuthMainController {
 					if (item == null) {
 						System.out.println(" The item does not exist !!!  "
 								+ ghCommit.getSHA1());
+
+						System.out.println(" Files Size is  "
+								+ ghCommit.getFiles().size());
+						// Build the changes
+						GHCommit anotherCommit = repository.getValue()
+								.getCommit(ghCommit.getSHA1());
+						System.out.println("TTTTTT The new Files Size ... "
+								+ anotherCommit.getFiles().size());
+						List<CommitFile> listFiles = new ArrayList<CommitFile>();
+
+						for (File file : anotherCommit.getFiles()) {
+							// file.getPatch()
+							if (file.getPatch() != null) {
+								listFiles.add(new CommitFile(
+										file.getFileName(), file.getStatus(),
+										file.getPatch()));
+								System.out.println(" One file name "
+										+ file.getFileName());
+								System.out.println(" Patch " + file.getPatch());
+							}
+						}
+
 						commitRepository.insert(new Commit(ghCommit.getSHA1(),
 								ghCommit.getAuthor().getLogin(), ghCommit
 										.getCommitShortInfo().getMessage(),
 								ghCommit.getSHA1(), repository.getValue()
-										.getName()));
-						
-						//ghCommit.
-						
-						//ghCommit.getFiles().get(0).getFileName();
-						//ghCommit.getFiles().get(0).get
+										.getName(), listFiles));
+
+						// ghCommit.
+
+						// ghCommit.
+						// ghCommit.getCommitShortInfo()
+
+						// ghCommit.getFiles().get(0).getFileName();
+						// ghCommit.getFiles().get(0).get
 					} else {
 						System.out.println(" The item already exists !!!  "
 								+ ghCommit.getSHA1());
@@ -166,14 +203,43 @@ public class OAuthMainController {
 
 		}
 
-		// Get Commits from Mongo DB
-		// List<Commit> commitList = null;
-		// commitList = commitRepository.findAll();
-
-		// model.addAttribute("listTheCommits", listTheCommits);
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 
 		return "OAuthMainPage";
+
+	}
+
+	// Get the Diff for a commit
+	@RequestMapping(value = "/diff/{commitHash}", method = RequestMethod.GET)
+	public String diff(@ModelAttribute("userLogin") UserLogin userLogin,
+			@PathVariable("commitHash") String commitHash, ModelMap model) {
+		model.addAttribute("email", userLogin.getEmail());
+		System.out.println(" #### the email is " + userLogin.getEmail());
+
+		if ((commitHash == null) || commitHash.equals("")) {
+			// Go back to the main page
+			model.addAttribute(new UserLogin());
+			// return "main";
+			return "GitOAuthPage";
+		}
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+				.where("_id").is(commitHash.trim())), Commit.class,
+				"commits");
+
+		// commitRepository.
+		model.addAttribute("commitMessage", commit.getMessage());
+		model.addAttribute("theFiles", commit.getCommitFiles());
+
+		return "DiffPage";
 
 	}
 

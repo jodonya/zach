@@ -16,7 +16,7 @@
      <td><strong>Commit(Message)</strong></td>
      <td><strong>Committer</strong></td>
       <td><strong>Repository</strong></td>
-      <td><strong>Hash</strong></td>
+      <td><strong>Diff</strong></td>
     </tr>
   <c:forEach items="${listTheCommits}" var="commit">
 
@@ -26,7 +26,8 @@
      <td><c:out value="${commit.message}" /></td>
      <td><c:out value="${commit.login}" /></td>
      <td><c:out value="${commit.repository}" /></td>
-     <td><c:out value="${commit.hash}" /></td>
+     <!-- td><c:out value="${commit.hash}" /></td -->
+     <td><a href="<c:out value="/diff/${commit.hash}"/>"> Diff</a> </td>
 
     </tr>
   </c:forEach>

@@ -1,5 +1,7 @@
 package com.zach.model;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,6 +18,8 @@ public class Commit {
 	private String hash;
 	private String repository;
 	
+	private List<CommitFile> commitFiles;
+	
 	public Commit(){
 		
 	}
@@ -27,12 +31,13 @@ public class Commit {
 		this.repository = repository;
 	}
 	
-	public Commit(String id, String login, String message, String hash, String repository){
+	public Commit(String id, String login, String message, String hash, String repository, List<CommitFile> commitFiles){
 		this.login = login;
 		this.message = message;
 		this.hash = hash;
 		this.repository = repository;
 		this.id = id;
+		this.commitFiles = commitFiles;
 	}
 	
 	
@@ -100,7 +105,14 @@ public class Commit {
 	public void set_class(String _class) {
 		this._class = _class;
 	}
-	
-	
+
+	public List<CommitFile> getCommitFiles() {
+		return commitFiles;
+	}
+
+	public void setCommitFiles(List<CommitFile> commitFiles) {
+		this.commitFiles = commitFiles;
+	}
+
 		
 }
