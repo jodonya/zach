@@ -35,6 +35,10 @@ public class OAuthMainController {
 
 	@Value("${token}")
 	private String OAUTHACCESSTOKE;
+	
+	@Value("${organizationname}")
+	private String ORGANIZATIONNAME;
+
 
 	@Autowired
 	private CommitRepository commitRepository;
@@ -64,7 +68,7 @@ public class OAuthMainController {
 		}
 		GHOrganization ghOrganization = null;
 		try {
-			ghOrganization = github.getOrganization("zachcollaboration");
+			ghOrganization = github.getOrganization(ORGANIZATIONNAME);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -125,6 +129,11 @@ public class OAuthMainController {
 										.getCommitShortInfo().getMessage(),
 								ghCommit.getSHA1(), repository.getValue()
 										.getName()));
+						
+						//ghCommit.
+						
+						//ghCommit.getFiles().get(0).getFileName();
+						//ghCommit.getFiles().get(0).get
 					} else {
 						System.out.println(" The item already exists !!!  "
 								+ ghCommit.getSHA1());
@@ -137,8 +146,6 @@ public class OAuthMainController {
 			}
 
 		}
-
-		// ghOrganization.getRepositories();
 
 		PagedIterable<GHUser> listUsers = null;
 		try {
