@@ -32,5 +32,26 @@
     </tr>
   </c:forEach>
 </table>
+
+<h1>Comments</h1>
+											<form:form name="commitComment" action='/addComment' method='POST' commandName="commitComment" >
+												<fieldset>
+													<label class="block clearfix">
+														<span class="block input-icon input-icon-right">
+															<form:textarea type="text" class="form-control" name="comment" path="comment" placeholder="Comment" />
+															<i class="ace-icon fa fa-user"></i>
+														</span>
+													</label>
+
+													<div class="space"></div>
+
+													<div class="clearfix">
+														
+														<button > <b>Post</b></button></p>
+													</div>
+
+													<div class="space-4"></div>
+												</fieldset>
+											</form:form>
 </body>
 </html>

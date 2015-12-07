@@ -17,6 +17,10 @@
      <td><strong>Committer</strong></td>
       <td><strong>Repository</strong></td>
       <td><strong>Diff</strong></td>
+      <td></td>
+      <td></td>
+       <td></td>
+      <td></td>
     </tr>
   <c:forEach items="${listTheCommits}" var="commit">
 
@@ -28,6 +32,10 @@
      <td><c:out value="${commit.repository}" /></td>
      <!-- td><c:out value="${commit.hash}" /></td -->
      <td><a href="<c:out value="/diff/${commit.hash}"/>"> Diff</a> </td>
+     <td><c:out value="     " /></td>
+     <td><a href="<c:out value="/up/${commit.hash}"/>"> +1</a> </td>
+     <td><c:out value="     " /></td>
+     <td><a href="<c:out value="/down/${commit.hash}"/>"> -1</a> </td>
 
     </tr>
   </c:forEach>

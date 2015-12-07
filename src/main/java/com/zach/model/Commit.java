@@ -19,6 +19,7 @@ public class Commit {
 	private String repository;
 	
 	private List<CommitFile> commitFiles;
+	private List<CommitComment> commitCommentList;
 	
 	public Commit(){
 		
@@ -114,5 +115,12 @@ public class Commit {
 		this.commitFiles = commitFiles;
 	}
 
-		
+	public List<CommitComment> getCommitCommentList() {
+		return commitCommentList;
+	}
+
+	public void setCommitCommentList(List<CommitComment> commitCommentList) {
+		this.commitCommentList = commitCommentList;
+	}
+	
 }

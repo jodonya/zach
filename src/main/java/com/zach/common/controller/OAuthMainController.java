@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.zach.common.config.MongoConfiguration;
 import com.zach.model.Commit;
+import com.zach.model.CommitComment;
 import com.zach.model.CommitFile;
 import com.zach.model.UserLogin;
 import com.zach.repository.CommitRepository;
@@ -134,27 +135,16 @@ public class OAuthMainController {
 						"commits");
 				try {
 					if (item == null) {
-						System.out.println(" The item does not exist !!!  "
-								+ ghCommit.getSHA1());
-
-						System.out.println(" Files Size is  "
-								+ ghCommit.getFiles().size());
 						// Build the changes
 						GHCommit anotherCommit = repository.getValue()
 								.getCommit(ghCommit.getSHA1());
-						System.out.println("TTTTTT The new Files Size ... "
-								+ anotherCommit.getFiles().size());
 						List<CommitFile> listFiles = new ArrayList<CommitFile>();
 
 						for (File file : anotherCommit.getFiles()) {
-							// file.getPatch()
 							if (file.getPatch() != null) {
 								listFiles.add(new CommitFile(
 										file.getFileName(), file.getStatus(),
 										file.getPatch()));
-								System.out.println(" One file name "
-										+ file.getFileName());
-								System.out.println(" Patch " + file.getPatch());
 							}
 						}
 
@@ -163,21 +153,12 @@ public class OAuthMainController {
 										.getCommitShortInfo().getMessage(),
 								ghCommit.getSHA1(), repository.getValue()
 										.getName(), listFiles));
-
-						// ghCommit.
-
-						// ghCommit.
-						// ghCommit.getCommitShortInfo()
-
-						// ghCommit.getFiles().get(0).getFileName();
-						// ghCommit.getFiles().get(0).get
 					} else {
 						System.out.println(" The item already exists !!!  "
 								+ ghCommit.getSHA1());
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					// e.printStackTrace();
+					e.printStackTrace();
 				}
 
 			}
@@ -188,33 +169,26 @@ public class OAuthMainController {
 		try {
 			listUsers = ghOrganization.listMembers();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		System.out.println(" The number of members is "
-				+ listUsers.asList().size());
 
 		int count = 0;
 		for (GHUser ghUser : listUsers.asList()) {
 			count++;
-			// ghUser.get
 			System.out.println("Member number " + count + " is " + ghUser);
 
 		}
 
 		model.addAttribute("listTheCommits", commitRepository.findAll());
-
 		return "OAuthMainPage";
-
 	}
 
 	// Get the Diff for a commit
 	@RequestMapping(value = "/diff/{commitHash}", method = RequestMethod.GET)
-	public String diff(@ModelAttribute("userLogin") UserLogin userLogin,
+	public String diff(@ModelAttribute("commitComment") CommitComment commitComment,
 			@PathVariable("commitHash") String commitHash, ModelMap model) {
-		model.addAttribute("email", userLogin.getEmail());
-		System.out.println(" #### the email is " + userLogin.getEmail());
+		model.addAttribute("email", model.get("email"));
+		System.out.println(" #### the email is " + model.get("email"));
 
 		if ((commitHash == null) || commitHash.equals("")) {
 			// Go back to the main page
@@ -232,12 +206,13 @@ public class OAuthMainController {
 			e.printStackTrace();
 		}
 		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
-				.where("_id").is(commitHash.trim())), Commit.class,
-				"commits");
+				.where("_id").is(commitHash.trim())), Commit.class, "commits");
 
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
 		model.addAttribute("theFiles", commit.getCommitFiles());
+		
+		model.addAttribute(new CommitComment());
 
 		return "DiffPage";
 
