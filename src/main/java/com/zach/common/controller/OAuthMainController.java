@@ -17,24 +17,30 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.zach.common.config.MongoConfiguration;
 import com.zach.model.Commit;
 import com.zach.model.CommitComment;
+import com.zach.model.CommitDown;
 import com.zach.model.CommitFile;
+import com.zach.model.CommitUp;
 import com.zach.model.UserLogin;
 import com.zach.repository.CommitRepository;
 
-@Controller
 /***
  * @author Japheth Odonya
  * */
+@SessionAttributes({ "email" })
+@Controller
 public class OAuthMainController {
 
 	@Value("${token}")
@@ -52,10 +58,13 @@ public class OAuthMainController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String main(@ModelAttribute("userLogin") UserLogin userLogin,
 			ModelMap model) {
-		model.addAttribute("email", userLogin.getEmail());
+		if ((userLogin.getEmail() != null) && (!userLogin.getEmail().equals(""))){
+			model.addAttribute("email", userLogin.getEmail());
+		}
+
 		System.out.println(" #### the email is " + userLogin.getEmail());
 
-		if ((userLogin.getEmail() == null) || userLogin.getEmail().equals("")) {
+		if ((model.get("email") == null) || model.get("email").equals("")) {
 			// Go back to the main page
 			model.addAttribute(new UserLogin());
 			// return "main";
@@ -152,7 +161,9 @@ public class OAuthMainController {
 								ghCommit.getAuthor().getLogin(), ghCommit
 										.getCommitShortInfo().getMessage(),
 								ghCommit.getSHA1(), repository.getValue()
-										.getName(), listFiles));
+										.getName(), listFiles,
+								new ArrayList<CommitUp>(),
+								new ArrayList<CommitDown>()));
 					} else {
 						System.out.println(" The item already exists !!!  "
 								+ ghCommit.getSHA1());
@@ -180,16 +191,17 @@ public class OAuthMainController {
 		}
 
 		model.addAttribute("listTheCommits", commitRepository.findAll());
+		model.addAttribute("email", userLogin.getEmail());
+		model.addAttribute("userLogin", userLogin);
 		return "OAuthMainPage";
 	}
 
 	// Get the Diff for a commit
-	@RequestMapping(value = "/diff/{commitHash}", method = RequestMethod.GET)
-	public String diff(@ModelAttribute("commitComment") CommitComment commitComment,
-			@PathVariable("commitHash") String commitHash, ModelMap model) {
-		model.addAttribute("email", model.get("email"));
-		System.out.println(" #### the email is " + model.get("email"));
-
+	@RequestMapping(value = "/diff/{commitHash}/{email}", method = RequestMethod.GET)
+	public String diff(
+			@ModelAttribute("commitComment") CommitComment commitComment,
+			@PathVariable("commitHash") String commitHash,
+			@PathVariable("email") String email, ModelMap model) {
 		if ((commitHash == null) || commitHash.equals("")) {
 			// Go back to the main page
 			model.addAttribute(new UserLogin());
@@ -211,11 +223,104 @@ public class OAuthMainController {
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
 		model.addAttribute("theFiles", commit.getCommitFiles());
-		
+		model.addAttribute("email", model.get("email"));
+
 		model.addAttribute(new CommitComment());
 
 		return "DiffPage";
 
 	}
+
+	// /up
+	@RequestMapping(value = "/up/{commitHash}/{email}", method = RequestMethod.GET)
+	public String up(@PathVariable("commitHash") String commitHash,
+			@PathVariable("email") String email, ModelMap model) {
+		// model.addAttribute("email", model.get("email"));
+		// System.out.println(" #### the email is " + model.get("email"));
+
+		if ((commitHash == null) || commitHash.equals("")) {
+			// Go back to the main page
+			model.addAttribute(new UserLogin());
+			// return "main";
+			return "GitOAuthPage";
+		}
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+				.where("_id").is(commitHash.trim())), Commit.class, "commits");
+
+		commit.getListCommitUps().add(new CommitUp(email));
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(commitHash.trim()));
+		
+		Update update = new Update();
+		//List<CommitUp> listCommitUps = commit.getListCommitUps().add(new CommitUp(email));
+		update.set("listCommitUps", commit.getListCommitUps());
+		mongoTemplate.upsert(query,  update, Commit.class, "commits");
+		//commitRepository.save(commit);
+
+		// commitRepository.
+		model.addAttribute("commitMessage", commit.getMessage());
+		// model.addAttribute("theFiles", commit.getCommitFiles());
+		model.addAttribute("listTheCommits", commitRepository.findAll());
+		model.addAttribute("userLogin", model.get("userLogin"));
+		return "OAuthMainPage";
+
+	}
+
+	// down
+	@RequestMapping(value = "/down/{commitHash}/{email}", method = RequestMethod.GET)
+	public String down(@PathVariable("commitHash") String commitHash,
+			@PathVariable("email") String email, ModelMap model) {
+		// model.addAttribute("email", model.get("email"));
+		// System.out.println(" #### the email is " + model.get("email"));
+
+		if ((commitHash == null) || commitHash.equals("")) {
+			// Go back to the main page
+			model.addAttribute(new UserLogin());
+			// return "main";
+			return "GitOAuthPage";
+		}
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+				.where("_id").is(commitHash.trim())), Commit.class, "commits");
+
+		commit.getListCommitDowns().add(new CommitDown(email));
+		//commitRepository.save(commit);
+		
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(commitHash.trim()));
+		
+		Update update = new Update();
+		//List<CommitUp> listCommitUps = commit.getListCommitUps().add(new CommitUp(email));
+		update.set("listCommitDowns", commit.getListCommitDowns());
+		mongoTemplate.upsert(query,  update, Commit.class, "commits");
+
+		// commitRepository.
+		model.addAttribute("commitMessage", commit.getMessage());
+		// model.addAttribute("theFiles", commit.getCommitFiles());
+		model.addAttribute("listTheCommits", commitRepository.findAll());
+		model.addAttribute("userLogin", model.get("userLogin"));
+
+		return "OAuthMainPage";
+
+	}
+
+	// addComment
 
 }

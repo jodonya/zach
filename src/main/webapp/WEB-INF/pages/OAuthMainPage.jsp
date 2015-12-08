@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
@@ -31,11 +32,11 @@
      <td><c:out value="${commit.login}" /></td>
      <td><c:out value="${commit.repository}" /></td>
      <!-- td><c:out value="${commit.hash}" /></td -->
-     <td><a href="<c:out value="/diff/${commit.hash}"/>"> Diff</a> </td>
+     <td><a href="<c:out value="/diff/${commit.hash}/${email}"/>"> Diff</a> </td>
      <td><c:out value="     " /></td>
-     <td><a href="<c:out value="/up/${commit.hash}"/>"> +1</a> </td>
+     <td><a href="<c:out value="/up/${commit.hash}/${email}"/>">  +1   <c:out value="${fn:length(commit.listCommitUps)}"/> ups</a> </td>
      <td><c:out value="     " /></td>
-     <td><a href="<c:out value="/down/${commit.hash}"/>"> -1</a> </td>
+     <td><a href="<c:out value="/down/${commit.hash}/${email}"/>"> -1  <c:out value="${fn:length(commit.listCommitDowns)}"/> Downs</a> </td>
 
     </tr>
   </c:forEach>

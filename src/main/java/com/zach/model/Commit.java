@@ -7,6 +7,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author Japheth Odonya
+ * @When Dec 8, 2015 2:39:42 AM
+ * 
+ * The Commit
  * */
 @Document(collection = "commits")
 public class Commit {
@@ -20,6 +23,8 @@ public class Commit {
 	
 	private List<CommitFile> commitFiles;
 	private List<CommitComment> commitCommentList;
+	private List<CommitUp> listCommitUps;
+	private List<CommitDown> listCommitDowns;
 	
 	public Commit(){
 		
@@ -39,6 +44,17 @@ public class Commit {
 		this.repository = repository;
 		this.id = id;
 		this.commitFiles = commitFiles;
+	}
+	
+	public Commit(String id, String login, String message, String hash, String repository, List<CommitFile> commitFiles, List<CommitUp> listCommitUps, List<CommitDown> listCommitDowns){
+		this.login = login;
+		this.message = message;
+		this.hash = hash;
+		this.repository = repository;
+		this.id = id;
+		this.commitFiles = commitFiles;
+		this.listCommitUps = listCommitUps;
+		this.listCommitDowns = listCommitDowns;
 	}
 	
 	
@@ -122,5 +138,21 @@ public class Commit {
 	public void setCommitCommentList(List<CommitComment> commitCommentList) {
 		this.commitCommentList = commitCommentList;
 	}
-	
+
+	public List<CommitUp> getListCommitUps() {
+		return listCommitUps;
+	}
+
+	public void setListCommitUps(List<CommitUp> listCommitUps) {
+		this.listCommitUps = listCommitUps;
+	}
+
+	public List<CommitDown> getListCommitDowns() {
+		return listCommitDowns;
+	}
+
+	public void setListCommitDowns(List<CommitDown> listCommitDowns) {
+		this.listCommitDowns = listCommitDowns;
+	}
+
 }

@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * @author Japheth Odonya
  * @When Dec 7, 2015 11:23:56 AM
+ * 
+ * Purpose : The Commit File -  for adding a list of files to the Commit
  * */
 @Document(collection = "commitFiles")
 public class CommitFile {

@@ -4,7 +4,7 @@
 	pageEncoding="UTF-8"%>
 <html>
 <body>
-<h2>Diff</h2>
+<h2>Diff : User Email : ${email} </h2>
 
 <h4>Commit : ${commitMessage}</h1>	
 <h4> </h4>
@@ -34,7 +34,7 @@
 </table>
 
 <h1>Comments</h1>
-											<form:form name="commitComment" action='/addComment' method='POST' commandName="commitComment" >
+										<form:form name="commitComment" action='/addComment' method='POST' commandName="commitComment" >
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">

@@ -1,5 +1,9 @@
 package com.zach.model;
 
+/***
+ * @author Japheth Odonya
+ * @When Dec 8, 2015 2:39:05 AM
+ * */
 public class UserLogin {
 	private String email;
 	private String password;
