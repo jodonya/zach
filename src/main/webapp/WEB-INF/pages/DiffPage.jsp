@@ -34,7 +34,7 @@
 </table>
 
 <h1>Comments</h1>
-										<form:form name="commitComment" action='/addComment' method='POST' commandName="commitComment" >
+										<form:form name="commitComment" action='/addComment/${commitHash}/${email}/' method='POST' commandName="commitComment" >
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
@@ -53,5 +53,30 @@
 													<div class="space-4"></div>
 												</fieldset>
 											</form:form>
+											
+<table>
+	 <tr>
+    
+     <td><strong></strong></td>
+     <td></td>
+     <td><strong></strong></td>
+     <td><strong></strong></td>
+      <td><strong></strong></td>
+      <td><strong></strong></td>
+    </tr>
+  <c:forEach items="${commitCommentList}" var="commitComment">
+
+    <tr>
+     <td></td>
+      <td></td>
+     <td><c:out value="${commitComment.comment}" /></td>
+     <td><strong>by</strong> <c:out value="${commitComment.email}" /></td>
+     <td><strong>at</strong> <c:out value="${commitComment.created}" /></td>
+     <!-- td><c:out value="${commit.hash}" /></td -->
+     <td></td>
+
+    </tr>
+  </c:forEach>
+</table>
 </body>
 </html>

@@ -32,11 +32,11 @@
      <td><c:out value="${commit.login}" /></td>
      <td><c:out value="${commit.repository}" /></td>
      <!-- td><c:out value="${commit.hash}" /></td -->
-     <td><a href="<c:out value="/diff/${commit.hash}/${email}"/>"> Diff</a> </td>
+     <td><a href="<c:out value="/diff/${commit.hash}/${email}/"/>"> Diff</a> </td>
      <td><c:out value="     " /></td>
-     <td><a href="<c:out value="/up/${commit.hash}/${email}"/>">  +1   <c:out value="${fn:length(commit.listCommitUps)}"/> ups</a> </td>
+     <td><a href="<c:out value="/up/${commit.hash}/${email}/"/>">  +1   <c:out value="${fn:length(commit.listCommitUps)}"/> ups</a> </td>
      <td><c:out value="     " /></td>
-     <td><a href="<c:out value="/down/${commit.hash}/${email}"/>"> -1  <c:out value="${fn:length(commit.listCommitDowns)}"/> Downs</a> </td>
+     <td><a href="<c:out value="/down/${commit.hash}/${email}/"/>"> -1  <c:out value="${fn:length(commit.listCommitDowns)}"/> Downs</a> </td>
 
     </tr>
   </c:forEach>

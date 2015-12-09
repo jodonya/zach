@@ -1,5 +1,7 @@
 package com.zach.model;
 
+import java.util.Date;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /***
@@ -12,12 +14,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class CommitComment {
 	private String comment;
 	private String commitHash;
+	private Date created;
+	private String email;
 	
 	public CommitComment(){}
 	
 	public CommitComment(String comment, String commitHash){
 		this.comment = comment;
 		this.commitHash = commitHash;
+	}
+	
+	public CommitComment(String comment, String commitHash, String email, Date created){
+		this.comment = comment;
+		this.commitHash = commitHash;
+		this.email = email;
+		this.created = created;
 	}
 
 	public String getComment() {
@@ -34,6 +45,22 @@ public class CommitComment {
 
 	public void setCommitHash(String commitHash) {
 		this.commitHash = commitHash;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 

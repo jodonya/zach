@@ -28,5 +28,7 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
 		// TODO Auto-generated method stub
 		return new MongoClient("127.0.0.1");
 	}
+	
+	//public Converter
 
 }
