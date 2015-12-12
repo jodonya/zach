@@ -4,7 +4,12 @@
 	pageEncoding="UTF-8"%>
 <html>
 <body>
-<h2>Diff : User Email : ${email} </h2>
+<div>
+<div><h4>Diff User Mail: ${email}</h1></div>
+<div><a href="<c:out value="/logout"/>"> Logout</a> </h1></div>
+</div>
+<div style="clear:both;"></div>
+<h4> </h4>
 
 <h4>Commit : ${commitMessage}</h1>	
 <h4> </h4>

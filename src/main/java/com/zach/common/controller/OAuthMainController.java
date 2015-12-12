@@ -61,7 +61,7 @@ import com.zach.repository.CommitRepository;
 /***
  * @author Japheth Odonya
  * */
-@SessionAttributes({ "email", "accessToken" })
+@SessionAttributes({ "email", "accessToken", "code" })
 @Controller
 public class OAuthMainController {
 
@@ -254,7 +254,7 @@ public class OAuthMainController {
 		String accessToken = null;
 		String code = null;
 
-		if (model.get("accessToken") != null) {
+		if ((model.get("accessToken") != null) && (!model.get("accessToken").equals(""))) {
 			accessToken = (String) model.get("accessToken");
 		} else {
 			for (Map.Entry<String, String> parameterSet : allRequestParams
@@ -275,7 +275,7 @@ public class OAuthMainController {
 		// Now get the email address
 		String email = null;
 
-		if (model.get("email") != null) {
+		if ((model.get("email") != null) && (!model.get("email").equals(""))) {
 			email = (String) model.get("email");
 		} else {
 			email = getEmailAddress(accessToken);
@@ -472,6 +472,7 @@ public class OAuthMainController {
 			@ModelAttribute("commitComment") CommitComment commitComment,
 			@PathVariable("commitHash") String commitHash,
 			@PathVariable("email") String email, ModelMap model) {
+		checkLogedIn(model);
 		if ((commitHash == null) || commitHash.equals("")) {
 			// Go back to the main page
 			model.addAttribute(new UserLogin());
@@ -520,8 +521,7 @@ public class OAuthMainController {
 	@RequestMapping(value = "/up/{commitHash}/{email}/", method = RequestMethod.GET)
 	public String up(@PathVariable("commitHash") String commitHash,
 			@PathVariable("email") String email, ModelMap model) {
-		// model.addAttribute("email", model.get("email"));
-		// System.out.println(" #### the email is " + model.get("email"));
+		checkLogedIn(model);
 
 		if ((commitHash == null) || commitHash.equals("")) {
 			// Go back to the main page
@@ -565,8 +565,7 @@ public class OAuthMainController {
 	@RequestMapping(value = "/down/{commitHash}/{email}/", method = RequestMethod.GET)
 	public String down(@PathVariable("commitHash") String commitHash,
 			@PathVariable("email") String email, ModelMap model) {
-		// model.addAttribute("email", model.get("email"));
-		// System.out.println(" #### the email is " + model.get("email"));
+		checkLogedIn(model);
 
 		if ((commitHash == null) || commitHash.equals("")) {
 			// Go back to the main page
@@ -614,6 +613,8 @@ public class OAuthMainController {
 			@ModelAttribute("commitComment") CommitComment commitComment,
 			@PathVariable("commitHash") String commitHash,
 			@PathVariable("email") String email, ModelMap model) {
+		
+		checkLogedIn(model);
 
 		// Get the commit and update with comment
 
@@ -693,10 +694,14 @@ public class OAuthMainController {
 		return "DiffPage";
 	}
 
+	/***
+	 * @author Japheth Odonya
+	 * @When Dec 12, 2015 5:49:29 PM
+	 * */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String main(ModelMap model) {
-
-		if (model.get("accessToken") != null) {
+		
+		if ((model.get("accessToken") != null) && (!model.get("accessToken").equals(""))) {
 			return "redirect:/login";
 		}
 
@@ -710,5 +715,29 @@ public class OAuthMainController {
 		return "GitOAuthPage";
 
 	}
+	
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	public String logout(ModelMap model) {
+//		model.remove("accessToken");
+//		model.remove("email");
+//		model.remove("code");
+		
+		 model.addAttribute("accessToken", "");
+		 model.addAttribute("email", "");
+		 model.addAttribute("code", "");
+		
+		return "redirect:/";
+
+	}
+	
+	public String checkLogedIn(ModelMap model){
+		
+		if ((model.get("accessToken") == null) || (model.get("accessToken").equals(""))) {
+			return "redirect:/";
+		}
+		
+		return null;
+	}
+
 
 }
