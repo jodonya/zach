@@ -1,5 +1,6 @@
 package com.zach.common.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,21 +14,17 @@ import com.zach.model.UserLogin;
 @RequestMapping("/")
 //extends AbstractController 
 public class GitOAuthController {
+	
+	@Value("${clientid}")
+	private String CLIENTID;
 
-//	@Override
-//	protected ModelAndView handleRequestInternal(HttpServletRequest request,
-//			HttpServletResponse response) throws Exception {
-//
-//		ModelAndView model = new ModelAndView("GitOAuthPage");
-//		model.addObject("msg", "Git Commits and Collaboration");
-//		model.addObject("userLogin", new UserLogin());
-//
-//		return model;
-//	}
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String main(ModelMap model) {
 		model.addAttribute(new UserLogin());
+		model.addAttribute("clientId", CLIENTID);
+		
+		System.out.println("Client Id is ### "+CLIENTID);
 		//return "main";
 		return "GitOAuthPage";
 

@@ -67,52 +67,11 @@
 								<div id="login-box" class="login-box visible widget-box no-border">
 									<div class="widget-body">
 										<div class="widget-main">
-											<h4 class="header blue lighter bigger">
-												<!-- i class="ace-icon fa fa-coffee green"></i -->
-												Please Login
-											</h4>
-
-											<div class="space-6"></div>
-
-											<form:form name="zachLogin" action='/login' method='POST' commandName="userLogin" >
-												<fieldset>
-													<label class="block clearfix">
-														<span class="block input-icon input-icon-right">
-															<form:input type="text" class="form-control" name="email" path="email" placeholder="Email" />
-															<i class="ace-icon fa fa-user"></i>
-														</span>
-													</label>
-
-													<!-- label class="block clearfix">
-														<span class="block input-icon input-icon-right">
-															<form:input type="password" path="password" name="password" class="form-control" placeholder="Password" />
-															<i class="ace-icon fa fa-lock"></i>
-														</span>
-													</label -->
-
-													<div class="space"></div>
-
-													<div class="clearfix">
-														<!-- label class="inline">
-															<input type="checkbox" class="ace" />
-															<span class="lbl"> Remember Me</span>
-														</label -->
-
-														<!-- button type="button"  class="width-35 pull-right btn btn-sm btn-primary">
-															<i class="ace-icon fa fa-key"></i>
-															<span class="bigger-110">Login</span>
-														</button -->
-														<!-- input type="submit" value="Login" class="width-35 pull-right btn btn-sm btn-primary" / -->
-														<button class="btn-auth btn-github">Sign in with <b>GitHub</b></button></p>
-													</div>
-
-													<div class="space-4"></div>
-												</fieldset>
-											</form:form>
 
 											<!-- div class="social-or-login center">
 												<span class="bigger-110">Or Login Using</span>
 											</div -->
+											<a href="https://github.com/login/oauth/authorize?scope=user:email&client_id=${clientId}">Sign in with <b>GitHub</b></a>
 
 											<div class="space-6"></div>
 

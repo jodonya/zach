@@ -8,6 +8,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
+
+import org.json.JSONObject;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCommit.File;
 import org.kohsuke.github.GHOrganization;
@@ -27,8 +32,23 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson.JacksonFactory;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zach.common.config.MongoConfiguration;
 import com.zach.model.Commit;
 import com.zach.model.CommitComment;
@@ -47,6 +67,12 @@ public class OAuthMainController {
 
 	@Value("${token}")
 	private String OAUTHACCESSTOKE;
+	
+	@Value("${clientid}")
+	private String CLIENTID;
+	
+	@Value("${clientsecret}")
+	private String CLIENTSECRET;
 
 	@Value("${organizationname}")
 	private String ORGANIZATIONNAME;
@@ -73,7 +99,25 @@ public class OAuthMainController {
 			// return "main";
 			return "GitOAuthPage";
 		}
-
+		
+		//Accessing Github page starts here
+		JsonFactory jsonFactory = new JacksonFactory();
+		HttpTransport httpTransport =  new NetHttpTransport();
+		
+		//AuthorizationCodeGrant
+		//AuthorizationCodeGrant grant =  new AuthorizationCodeGrant()
+		AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(), httpTransport, jsonFactory,
+				new GenericUrl("https://github.com/login/oauth/access_token"),
+				new ClientParametersAuthentication(CLIENTID, CLIENTSECRET),
+				CLIENTID, "https://github.com/login/oauth/authorize").build();
+		
+		
+		
+		
+		//TokenResponse tokeResponse =  flow.newTokenRequest(code)
+		
+		//Accessing Github page ends here
+		
 		// Connecting to Github using the GitHub API
 		GitHub github = null;
 		try {
@@ -199,27 +243,97 @@ public class OAuthMainController {
 		return "OAuthMainPage";
 	}
 	
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String login(@ModelAttribute("userLogin") UserLogin userLogin,
+	//@RequestMapping(value = "/login", method = RequestMethod.GET)
+	@RequestMapping(value = {"/login"}, method = RequestMethod.GET)
+	public String login(@RequestParam Map<String,String> allRequestParams,
 			ModelMap model) {
-		if ((userLogin.getEmail() != null) && (!userLogin.getEmail().equals(""))){
-			System.out.println("TTTTTTT The mail is "+userLogin.getEmail());
-			model.addAttribute("email", userLogin.getEmail());
+		
+		//@RequestMapping(value = {"/search/", "/search"}, method = RequestMethod.GET)
+		
+		//allRequestParams.entrySet().iterator()
+		String code = null;
+		
+		for (Map.Entry<String, String> parameterSet : allRequestParams.entrySet()) {
+			//iterable_element.getValue()
+			System.out.println("KKKKKKKK Key is "+parameterSet.getKey()+" Value is "+parameterSet.getValue());
+			if (parameterSet.getKey().equals("code")){
+				code = parameterSet.getValue();
+			}
+			
 		}
-
-		System.out.println(" #### the email is " + userLogin.getEmail());
-
-		if ((model.get("email") == null) || model.get("email").equals("")) {
-			// Go back to the main page
-			model.addAttribute(new UserLogin());
-			// return "main";
-			return "GitOAuthPage";
-		}
-
-		// Connecting to Github using the GitHub API
+		
+		//Accessing Github page starts here
+		JsonFactory jsonFactory = new JacksonFactory();
+		HttpTransport httpTransport =  new NetHttpTransport();
+		
+		//AuthorizationCodeGrant
+		//AuthorizationCodeGrant grant =  new AuthorizationCodeGrant()
+		// AuthorizationCodeFlow flow = new
+		// AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(),
+		// httpTransport, jsonFactory,
+		// new GenericUrl("https://github.com/login/oauth/access_token"),
+		// new ClientParametersAuthentication(CLIENTID, CLIENTSECRET),
+		// CLIENTID, "https://github.com/login/oauth/authorize").build();
+		// TokenResponse tokenResponse = null;
+		// try {
+		// tokenResponse = flow
+		// .newTokenRequest(code)
+		// .setScopes(Collections.singletonList("user:email"))
+		// // .setRe
+		//
+		// .setRequestInitializer(new HttpRequestInitializer() {
+		// @Override
+		// public void initialize(HttpRequest request) throws IOException {
+		// //request.getHeaders().setAccept("application/json");
+		// //request.headers
+		// // request.se
+		// // request.
+		// // request.s
+		// }
+		// }).execute();
+		// } catch (IOException e3) {
+		// // TODO Auto-generated catch block
+		// e3.printStackTrace();
+		// }
+		//
+		// if (tokenResponse != null){
+		// System.out.println("TTTTT Token ... "+tokenResponse.getAccessToken());
+		// System.out.println(" SSSSS Scope "+tokenResponse.getScope());
+		//
+		//
+		// } else{
+		// System.out.println(" TTTT No token ");
+		// }
+		
+		//Make a Rest call
+		ClientConfig config =  new DefaultClientConfig();
+		Client client = Client.create(config);
+		WebResource webResource = client.resource(UriBuilder.fromUri("https://github.com/login/oauth/access_token").build());
+		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+		formData.add("client_id", CLIENTID);
+		formData.add("client_secret", CLIENTSECRET);
+		formData.add("code", code);
+		formData.add("accept", "json");
+		
+		ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, formData);
+		//WebResource.Builder builder = webResource.getRequestBuilder();
+       // ClientResponse response = builder.accept("application/json").get(ClientResponse.class);
+       // String json = response.getEntity(String.class);
+        String responseMessage = response.getEntity(String.class);
+		System.out.println("RRRRR Response "+responseMessage);
+		
+		JSONObject json = new JSONObject(responseMessage);
+		
+		String accessToken  = json.getString("access_token").trim();
+		
+		System.out.println("Access Code "+accessToken);
+		
+		//Now get the email address
+		String email = getEmailAddress(accessToken);
+		
 		GitHub github = null;
 		try {
-			github = GitHub.connectUsingOAuth(OAUTHACCESSTOKE);
+			github = GitHub.connectUsingOAuth(accessToken);
 		} catch (IOException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
@@ -336,9 +450,39 @@ public class OAuthMainController {
 		}
 
 		model.addAttribute("listTheCommits", commitRepository.findAll());
-		model.addAttribute("email", userLogin.getEmail());
-		model.addAttribute("userLogin", userLogin);
+		model.addAttribute("email", email);
+		//model.addAttribute("userLogin", new UserLogin());
 		return "OAuthMainPage";
+	}
+
+	private String getEmailAddress(String accessToken) {
+		ClientConfig config =  new DefaultClientConfig();
+		Client client = Client.create(config);
+		
+		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+		//formData.add("client_id", CLIENTID);
+		//formData.add("client_secret", CLIENTSECRET);
+		formData.add("access_token", accessToken);
+		WebResource webResource = client.resource(UriBuilder.fromUri("https://api.github.com/user/emails").build()).queryParams(formData);
+		
+		WebResource.Builder builder = webResource.getRequestBuilder();
+		
+		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);//
+				
+				//.accept(MediaType.APPLICATION_JSON)
+				
+				//.get(ClientResponse.class, formData);
+//		WebResource.Builder builder = webResource.getRequestBuilder();
+       // ClientResponse response = builder.accept("application/json").get(ClientResponse.class);
+       // String json = response.getEntity(String.class);
+        String responseMessage = response.getEntity(String.class);
+        responseMessage = responseMessage.replace("[", "").replace("]", "");
+		System.out.println("RRRRR Email Response "+responseMessage);
+		
+		JSONObject json = new JSONObject(responseMessage);
+		
+		//String accessToken  = json.getString("access_token").trim();
+		return json.getString("email");
 	}
 
 	// Get the Diff for a commit

@@ -180,11 +180,58 @@
 			<version>1.71</version>
 		</dependency>
 		
+		<dependency>
+			<groupId>com.google.api.client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.4.0-alpha</version>
+		</dependency>
+		
 		<!-- dependency>
+			<groupId>com.google.api.client</groupId>
+			<artifactId>google-api-client-auth-oauth2</artifactId>
+			<version>1.2.3-alpha</version>
+		</dependency -->
+		<!-- dependency>
+			<groupId>com.google.api.client</groupId>
+			<artifactId>google-api-client-googleapis</artifactId>
+			<version>1.4.0-alpha</version>
+		</dependency -->
+		<!-- dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client-jetty</artifactId>
+			<version>1.18.0-rc</version>
+		</dependency -->
+		<!-- dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client</artifactId>
+			<version>1.21.0</version>
+		</dependency -->
+		<dependency>
+	<groupId>com.google.oauth-client</groupId>
+	<artifactId>google-oauth-client-jetty</artifactId>
+	<version>1.20.0</version>
+</dependency>
+		
+		
+		<!--dependency>
+			<groupId>com.google.api.client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.2.2-alpha</version>
+		</dependency>
+		
+		<dependency>
+    		<groupId>com.google.http-client</groupId>
+    		<artifactId>google-http-client-jackson</artifactId>
+    		<version>1.15.0-rc</version>
+		</dependency -->
+		
+		
+		
+		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
 			<version>1.19</version>
-		</dependency -->
+		</dependency>
 		<dependency>
 	<groupId>com.sun.jersey</groupId>
 	<artifactId>jersey-server</artifactId>
@@ -208,7 +255,7 @@
 	<dependency>
 		<groupId>org.json</groupId>
 		<artifactId>json</artifactId>
-		<version>20141113</version>
+		<version>20151123</version>
 	</dependency>
 		
 		<!-- dependency>
