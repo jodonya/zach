@@ -61,7 +61,7 @@ import com.zach.repository.CommitRepository;
 /***
  * @author Japheth Odonya
  * */
-@SessionAttributes({ "email" })
+@SessionAttributes({ "email", "accessToken" })
 @Controller
 public class OAuthMainController {
 
@@ -84,7 +84,7 @@ public class OAuthMainController {
 	MongoConfiguration mongoConfiguration;
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public String main(@ModelAttribute("userLogin") UserLogin userLogin,
+	public String mainLogin(@ModelAttribute("userLogin") UserLogin userLogin,
 			ModelMap model) {
 		if ((userLogin.getEmail() != null)
 				&& (!userLogin.getEmail().equals(""))) {
@@ -243,101 +243,43 @@ public class OAuthMainController {
 		return "OAuthMainPage";
 	}
 
+	/**
+	 * @author Japheth Odonya
+	 * @When Dec 12, 2015 4:55:35 PM
+	 * */
 	// @RequestMapping(value = "/login", method = RequestMethod.GET)
 	@RequestMapping(value = { "/login" }, method = RequestMethod.GET)
 	public String login(@RequestParam Map<String, String> allRequestParams,
 			ModelMap model) {
-
-		// @RequestMapping(value = {"/search/", "/search"}, method =
-		// RequestMethod.GET)
-
-		// allRequestParams.entrySet().iterator()
+		String accessToken = null;
 		String code = null;
 
-		for (Map.Entry<String, String> parameterSet : allRequestParams
-				.entrySet()) {
-			// iterable_element.getValue()
-			System.out.println("KKKKKKKK Key is " + parameterSet.getKey()
-					+ " Value is " + parameterSet.getValue());
-			if (parameterSet.getKey().equals("code")) {
-				code = parameterSet.getValue();
+		if (model.get("accessToken") != null) {
+			accessToken = (String) model.get("accessToken");
+		} else {
+			for (Map.Entry<String, String> parameterSet : allRequestParams
+					.entrySet()) {
+				// iterable_element.getValue()
+				System.out.println("KKKKKKKK Key is " + parameterSet.getKey()
+						+ " Value is " + parameterSet.getValue());
+				if (parameterSet.getKey().equals("code")) {
+					code = parameterSet.getValue();
+				}
+
 			}
+
+			accessToken = getAccessToken(code, accessToken);
 
 		}
 
-		// Accessing Github page starts here
-		JsonFactory jsonFactory = new JacksonFactory();
-		HttpTransport httpTransport = new NetHttpTransport();
-
-		// AuthorizationCodeGrant
-		// AuthorizationCodeGrant grant = new AuthorizationCodeGrant()
-		// AuthorizationCodeFlow flow = new
-		// AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(),
-		// httpTransport, jsonFactory,
-		// new GenericUrl("https://github.com/login/oauth/access_token"),
-		// new ClientParametersAuthentication(CLIENTID, CLIENTSECRET),
-		// CLIENTID, "https://github.com/login/oauth/authorize").build();
-		// TokenResponse tokenResponse = null;
-		// try {
-		// tokenResponse = flow
-		// .newTokenRequest(code)
-		// .setScopes(Collections.singletonList("user:email"))
-		// // .setRe
-		//
-		// .setRequestInitializer(new HttpRequestInitializer() {
-		// @Override
-		// public void initialize(HttpRequest request) throws IOException {
-		// //request.getHeaders().setAccept("application/json");
-		// //request.headers
-		// // request.se
-		// // request.
-		// // request.s
-		// }
-		// }).execute();
-		// } catch (IOException e3) {
-		// // TODO Auto-generated catch block
-		// e3.printStackTrace();
-		// }
-		//
-		// if (tokenResponse != null){
-		// System.out.println("TTTTT Token ... "+tokenResponse.getAccessToken());
-		// System.out.println(" SSSSS Scope "+tokenResponse.getScope());
-		//
-		//
-		// } else{
-		// System.out.println(" TTTT No token ");
-		// }
-
-		// Make a Rest call
-		ClientConfig config = new DefaultClientConfig();
-		Client client = Client.create(config);
-		WebResource webResource = client.resource(UriBuilder.fromUri(
-				"https://github.com/login/oauth/access_token").build());
-		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
-		formData.add("client_id", CLIENTID);
-		formData.add("client_secret", CLIENTSECRET);
-		formData.add("code", code);
-		formData.add("accept", "json");
-
-		ClientResponse response = webResource
-				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-				.accept(MediaType.APPLICATION_JSON)
-				.post(ClientResponse.class, formData);
-		// WebResource.Builder builder = webResource.getRequestBuilder();
-		// ClientResponse response =
-		// builder.accept("application/json").get(ClientResponse.class);
-		// String json = response.getEntity(String.class);
-		String responseMessage = response.getEntity(String.class);
-		System.out.println("RRRRR Response " + responseMessage);
-
-		JSONObject json = new JSONObject(responseMessage);
-
-		String accessToken = json.getString("access_token").trim();
-
-		System.out.println("Access Code " + accessToken);
-
 		// Now get the email address
-		String email = getEmailAddress(accessToken);
+		String email = null;
+
+		if (model.get("email") != null) {
+			email = (String) model.get("email");
+		} else {
+			email = getEmailAddress(accessToken);
+		}
 
 		GitHub github = null;
 		try {
@@ -360,7 +302,7 @@ public class OAuthMainController {
 		Map<String, GHRepository> mapRepositories = null;
 		try {
 			mapRepositories = github.getMyself().getAllRepositories();
-			//mapRepositories = ghOrganization.getRepositories();
+			// mapRepositories = ghOrganization.getRepositories();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -460,8 +402,41 @@ public class OAuthMainController {
 
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("email", email);
-		// model.addAttribute("userLogin", new UserLogin());
+		model.addAttribute("accessToken", accessToken);
 		return "OAuthMainPage";
+	}
+
+	private String getAccessToken(String code, String accessToken) {
+		if ((accessToken != null) && (!accessToken.equals("")))
+			return accessToken;
+
+		// Accessing Github page starts here
+		// Make a Rest call
+		ClientConfig config = new DefaultClientConfig();
+		Client client = Client.create(config);
+		WebResource webResource = client.resource(UriBuilder.fromUri(
+				"https://github.com/login/oauth/access_token").build());
+		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
+		formData.add("client_id", CLIENTID);
+		formData.add("client_secret", CLIENTSECRET);
+		formData.add("code", code);
+		formData.add("accept", "json");
+
+		ClientResponse response = webResource
+				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+				.accept(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, formData);
+		// WebResource.Builder builder = webResource.getRequestBuilder();
+		// ClientResponse response =
+		// builder.accept("application/json").get(ClientResponse.class);
+		// String json = response.getEntity(String.class);
+		String responseMessage = response.getEntity(String.class);
+		System.out.println("RRRRR Response " + responseMessage);
+
+		JSONObject json = new JSONObject(responseMessage);
+
+		accessToken = json.getString("access_token").trim();
+		return accessToken;
 	}
 
 	/****
@@ -716,6 +691,24 @@ public class OAuthMainController {
 		model.addAttribute("commitComment", commitComment);
 
 		return "DiffPage";
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String main(ModelMap model) {
+
+		if (model.get("accessToken") != null) {
+			return "redirect:/login";
+		}
+
+		model.addAttribute(new UserLogin());
+		model.addAttribute("clientId", CLIENTID);
+
+		// if (model)
+
+		System.out.println("Client Id is ### " + CLIENTID);
+		// return "main";
+		return "GitOAuthPage";
+
 	}
 
 }

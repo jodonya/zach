@@ -11,7 +11,7 @@ import com.zach.model.UserLogin;
 
 @Controller
 @SessionAttributes("userLogin")
-@RequestMapping("/")
+@RequestMapping("/old")
 //extends AbstractController 
 public class GitOAuthController {
 	
@@ -19,10 +19,12 @@ public class GitOAuthController {
 	private String CLIENTID;
 
 	
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@RequestMapping(value = "/old", method = RequestMethod.GET)
 	public String main(ModelMap model) {
 		model.addAttribute(new UserLogin());
 		model.addAttribute("clientId", CLIENTID);
+		
+		//if (model)
 		
 		System.out.println("Client Id is ### "+CLIENTID);
 		//return "main";
