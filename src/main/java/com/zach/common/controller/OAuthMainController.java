@@ -254,7 +254,8 @@ public class OAuthMainController {
 		String accessToken = null;
 		String code = null;
 
-		if ((model.get("accessToken") != null) && (!model.get("accessToken").equals(""))) {
+		if ((model.get("accessToken") != null)
+				&& (!model.get("accessToken").equals(""))) {
 			accessToken = (String) model.get("accessToken");
 		} else {
 			for (Map.Entry<String, String> parameterSet : allRequestParams
@@ -326,14 +327,32 @@ public class OAuthMainController {
 				sequence++;
 				try {
 					// ghCommit.getLastStatus().
+					if (ghCommit.getAuthor() == null) {
+						System.out.println(" The Athor is null .... ");
+					}
+
+					if (ghCommit.getCommitShortInfo() == null) {
+						System.out.println(" Commit Short Info is null .... ");
+					}// ghCommit.getCommitShortInfo().getMessage()
+					String author = "";
+					author = (ghCommit.getAuthor() != null) ? ghCommit
+							.getAuthor().getLogin() : "No Author";
+
+					String commitMessage = "";
+					commitMessage = (ghCommit.getCommitShortInfo() != null) ? ghCommit
+							.getCommitShortInfo().getMessage() : "No Message";
+
 					System.out.println("Commit # " + sequence + " Author "
-							+ ghCommit.getAuthor().getLogin() + " message "
-							+ ghCommit.getCommitShortInfo().getMessage()
-							+ " hash " + ghCommit.getSHA1());
-					listTheCommits.add(new Commit(ghCommit.getAuthor()
-							.getLogin(), ghCommit.getCommitShortInfo()
-							.getMessage(), ghCommit.getSHA1(), repository
-							.getValue().getName()));
+							+ author + " message " + commitMessage + " hash "
+							+ ghCommit.getSHA1());
+
+					listTheCommits.add(new Commit(
+							ghCommit.getAuthor() != null ? ghCommit.getAuthor()
+									.getLogin() : "No Author" + " message ",
+							ghCommit.getCommitShortInfo() != null ? ghCommit
+									.getCommitShortInfo().getMessage()
+									: "No Message", ghCommit.getSHA1(),
+							repository.getValue().getName()));
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -367,11 +386,18 @@ public class OAuthMainController {
 							}
 						}
 
+						String author = "";
+						author = (ghCommit.getAuthor() != null) ? ghCommit
+								.getAuthor().getLogin() : "No Author";
+
+						String commitMessage = "";
+						commitMessage = (ghCommit.getCommitShortInfo() != null) ? ghCommit
+								.getCommitShortInfo().getMessage()
+								: "No Message";
+
 						commitRepository.insert(new Commit(ghCommit.getSHA1(),
-								ghCommit.getAuthor().getLogin(), ghCommit
-										.getCommitShortInfo().getMessage(),
-								ghCommit.getSHA1(), repository.getValue()
-										.getName(), listFiles,
+								author, commitMessage, ghCommit.getSHA1(),
+								repository.getValue().getName(), listFiles,
 								new ArrayList<CommitUp>(),
 								new ArrayList<CommitDown>()));
 					} else {
@@ -613,7 +639,7 @@ public class OAuthMainController {
 			@ModelAttribute("commitComment") CommitComment commitComment,
 			@PathVariable("commitHash") String commitHash,
 			@PathVariable("email") String email, ModelMap model) {
-		
+
 		checkLogedIn(model);
 
 		// Get the commit and update with comment
@@ -700,8 +726,9 @@ public class OAuthMainController {
 	 * */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String main(ModelMap model) {
-		
-		if ((model.get("accessToken") != null) && (!model.get("accessToken").equals(""))) {
+
+		if ((model.get("accessToken") != null)
+				&& (!model.get("accessToken").equals(""))) {
 			return "redirect:/login";
 		}
 
@@ -715,29 +742,29 @@ public class OAuthMainController {
 		return "GitOAuthPage";
 
 	}
-	
+
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
 	public String logout(ModelMap model) {
-//		model.remove("accessToken");
-//		model.remove("email");
-//		model.remove("code");
-		
-		 model.addAttribute("accessToken", "");
-		 model.addAttribute("email", "");
-		 model.addAttribute("code", "");
-		
+		// model.remove("accessToken");
+		// model.remove("email");
+		// model.remove("code");
+
+		model.addAttribute("accessToken", "");
+		model.addAttribute("email", "");
+		model.addAttribute("code", "");
+
 		return "redirect:/";
 
 	}
-	
-	public String checkLogedIn(ModelMap model){
-		
-		if ((model.get("accessToken") == null) || (model.get("accessToken").equals(""))) {
+
+	public String checkLogedIn(ModelMap model) {
+
+		if ((model.get("accessToken") == null)
+				|| (model.get("accessToken").equals(""))) {
 			return "redirect:/";
 		}
-		
+
 		return null;
 	}
-
 
 }
