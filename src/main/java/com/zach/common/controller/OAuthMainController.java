@@ -67,10 +67,10 @@ public class OAuthMainController {
 
 	@Value("${token}")
 	private String OAUTHACCESSTOKE;
-	
+
 	@Value("${clientid}")
 	private String CLIENTID;
-	
+
 	@Value("${clientsecret}")
 	private String CLIENTSECRET;
 
@@ -86,8 +86,9 @@ public class OAuthMainController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String main(@ModelAttribute("userLogin") UserLogin userLogin,
 			ModelMap model) {
-		if ((userLogin.getEmail() != null) && (!userLogin.getEmail().equals(""))){
-			System.out.println("TTTTTTT The mail is "+userLogin.getEmail());
+		if ((userLogin.getEmail() != null)
+				&& (!userLogin.getEmail().equals(""))) {
+			System.out.println("TTTTTTT The mail is " + userLogin.getEmail());
 			model.addAttribute("email", userLogin.getEmail());
 		}
 
@@ -99,25 +100,24 @@ public class OAuthMainController {
 			// return "main";
 			return "GitOAuthPage";
 		}
-		
-		//Accessing Github page starts here
+
+		// Accessing Github page starts here
 		JsonFactory jsonFactory = new JacksonFactory();
-		HttpTransport httpTransport =  new NetHttpTransport();
-		
-		//AuthorizationCodeGrant
-		//AuthorizationCodeGrant grant =  new AuthorizationCodeGrant()
-		AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(), httpTransport, jsonFactory,
-				new GenericUrl("https://github.com/login/oauth/access_token"),
+		HttpTransport httpTransport = new NetHttpTransport();
+
+		// AuthorizationCodeGrant
+		// AuthorizationCodeGrant grant = new AuthorizationCodeGrant()
+		AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
+				BearerToken.authorizationHeaderAccessMethod(), httpTransport,
+				jsonFactory, new GenericUrl(
+						"https://github.com/login/oauth/access_token"),
 				new ClientParametersAuthentication(CLIENTID, CLIENTSECRET),
 				CLIENTID, "https://github.com/login/oauth/authorize").build();
-		
-		
-		
-		
-		//TokenResponse tokeResponse =  flow.newTokenRequest(code)
-		
-		//Accessing Github page ends here
-		
+
+		// TokenResponse tokeResponse = flow.newTokenRequest(code)
+
+		// Accessing Github page ends here
+
 		// Connecting to Github using the GitHub API
 		GitHub github = null;
 		try {
@@ -242,32 +242,35 @@ public class OAuthMainController {
 		model.addAttribute("userLogin", userLogin);
 		return "OAuthMainPage";
 	}
-	
-	//@RequestMapping(value = "/login", method = RequestMethod.GET)
-	@RequestMapping(value = {"/login"}, method = RequestMethod.GET)
-	public String login(@RequestParam Map<String,String> allRequestParams,
+
+	// @RequestMapping(value = "/login", method = RequestMethod.GET)
+	@RequestMapping(value = { "/login" }, method = RequestMethod.GET)
+	public String login(@RequestParam Map<String, String> allRequestParams,
 			ModelMap model) {
-		
-		//@RequestMapping(value = {"/search/", "/search"}, method = RequestMethod.GET)
-		
-		//allRequestParams.entrySet().iterator()
+
+		// @RequestMapping(value = {"/search/", "/search"}, method =
+		// RequestMethod.GET)
+
+		// allRequestParams.entrySet().iterator()
 		String code = null;
-		
-		for (Map.Entry<String, String> parameterSet : allRequestParams.entrySet()) {
-			//iterable_element.getValue()
-			System.out.println("KKKKKKKK Key is "+parameterSet.getKey()+" Value is "+parameterSet.getValue());
-			if (parameterSet.getKey().equals("code")){
+
+		for (Map.Entry<String, String> parameterSet : allRequestParams
+				.entrySet()) {
+			// iterable_element.getValue()
+			System.out.println("KKKKKKKK Key is " + parameterSet.getKey()
+					+ " Value is " + parameterSet.getValue());
+			if (parameterSet.getKey().equals("code")) {
 				code = parameterSet.getValue();
 			}
-			
+
 		}
-		
-		//Accessing Github page starts here
+
+		// Accessing Github page starts here
 		JsonFactory jsonFactory = new JacksonFactory();
-		HttpTransport httpTransport =  new NetHttpTransport();
-		
-		//AuthorizationCodeGrant
-		//AuthorizationCodeGrant grant =  new AuthorizationCodeGrant()
+		HttpTransport httpTransport = new NetHttpTransport();
+
+		// AuthorizationCodeGrant
+		// AuthorizationCodeGrant grant = new AuthorizationCodeGrant()
 		// AuthorizationCodeFlow flow = new
 		// AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(),
 		// httpTransport, jsonFactory,
@@ -304,33 +307,38 @@ public class OAuthMainController {
 		// } else{
 		// System.out.println(" TTTT No token ");
 		// }
-		
-		//Make a Rest call
-		ClientConfig config =  new DefaultClientConfig();
+
+		// Make a Rest call
+		ClientConfig config = new DefaultClientConfig();
 		Client client = Client.create(config);
-		WebResource webResource = client.resource(UriBuilder.fromUri("https://github.com/login/oauth/access_token").build());
+		WebResource webResource = client.resource(UriBuilder.fromUri(
+				"https://github.com/login/oauth/access_token").build());
 		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
 		formData.add("client_id", CLIENTID);
 		formData.add("client_secret", CLIENTSECRET);
 		formData.add("code", code);
 		formData.add("accept", "json");
-		
-		ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, formData);
-		//WebResource.Builder builder = webResource.getRequestBuilder();
-       // ClientResponse response = builder.accept("application/json").get(ClientResponse.class);
-       // String json = response.getEntity(String.class);
-        String responseMessage = response.getEntity(String.class);
-		System.out.println("RRRRR Response "+responseMessage);
-		
+
+		ClientResponse response = webResource
+				.type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+				.accept(MediaType.APPLICATION_JSON)
+				.post(ClientResponse.class, formData);
+		// WebResource.Builder builder = webResource.getRequestBuilder();
+		// ClientResponse response =
+		// builder.accept("application/json").get(ClientResponse.class);
+		// String json = response.getEntity(String.class);
+		String responseMessage = response.getEntity(String.class);
+		System.out.println("RRRRR Response " + responseMessage);
+
 		JSONObject json = new JSONObject(responseMessage);
-		
-		String accessToken  = json.getString("access_token").trim();
-		
-		System.out.println("Access Code "+accessToken);
-		
-		//Now get the email address
+
+		String accessToken = json.getString("access_token").trim();
+
+		System.out.println("Access Code " + accessToken);
+
+		// Now get the email address
 		String email = getEmailAddress(accessToken);
-		
+
 		GitHub github = null;
 		try {
 			github = GitHub.connectUsingOAuth(accessToken);
@@ -351,7 +359,8 @@ public class OAuthMainController {
 		//
 		Map<String, GHRepository> mapRepositories = null;
 		try {
-			mapRepositories = ghOrganization.getRepositories();
+			mapRepositories = github.getMyself().getAllRepositories();
+			//mapRepositories = ghOrganization.getRepositories();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -451,37 +460,34 @@ public class OAuthMainController {
 
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("email", email);
-		//model.addAttribute("userLogin", new UserLogin());
+		// model.addAttribute("userLogin", new UserLogin());
 		return "OAuthMainPage";
 	}
 
+	/****
+	 * @author Japheth Odonya
+	 * @When Dec 12, 2015 4:22:25 PM
+	 * 
+	 *       Get the member email address given the accessToken
+	 * */
 	private String getEmailAddress(String accessToken) {
-		ClientConfig config =  new DefaultClientConfig();
+		ClientConfig config = new DefaultClientConfig();
 		Client client = Client.create(config);
-		
+
 		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
-		//formData.add("client_id", CLIENTID);
-		//formData.add("client_secret", CLIENTSECRET);
 		formData.add("access_token", accessToken);
-		WebResource webResource = client.resource(UriBuilder.fromUri("https://api.github.com/user/emails").build()).queryParams(formData);
-		
+		WebResource webResource = client.resource(
+				UriBuilder.fromUri("https://api.github.com/user/emails")
+						.build()).queryParams(formData);
 		WebResource.Builder builder = webResource.getRequestBuilder();
-		
-		ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);//
-				
-				//.accept(MediaType.APPLICATION_JSON)
-				
-				//.get(ClientResponse.class, formData);
-//		WebResource.Builder builder = webResource.getRequestBuilder();
-       // ClientResponse response = builder.accept("application/json").get(ClientResponse.class);
-       // String json = response.getEntity(String.class);
-        String responseMessage = response.getEntity(String.class);
-        responseMessage = responseMessage.replace("[", "").replace("]", "");
-		System.out.println("RRRRR Email Response "+responseMessage);
-		
+		ClientResponse response = webResource
+				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);//
+
+		String responseMessage = response.getEntity(String.class);
+		responseMessage = responseMessage.replace("[", "").replace("]", "");
+		// System.out.println("RRRRR Email Response "+responseMessage);
 		JSONObject json = new JSONObject(responseMessage);
-		
-		//String accessToken  = json.getString("access_token").trim();
+
 		return json.getString("email");
 	}
 
@@ -497,8 +503,8 @@ public class OAuthMainController {
 			// return "main";
 			return "GitOAuthPage";
 		}
-		
-		System.out.println("The email passed across is ... "+email);
+
+		System.out.println("The email passed across is ... " + email);
 
 		// Get the list of files
 		MongoTemplate mongoTemplate = null;
@@ -514,18 +520,18 @@ public class OAuthMainController {
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
 		model.addAttribute("theFiles", commit.getCommitFiles());
-		
+
 		List<CommitComment> theCommentList = commit.getCommitCommentList();
-		
+
 		if ((theCommentList != null) && (theCommentList.size() > 0))
 			Collections.reverse(theCommentList);
 
 		model.addAttribute("commitCommentList", theCommentList);
 		model.addAttribute("email", model.get("email"));
-		
+
 		model.addAttribute("commitHash", commitHash);
 		model.addAttribute("email", email);
-		
+
 		CommitComment newCommitComment = new CommitComment();
 		newCommitComment.setCommitHash(commitHash);
 
@@ -563,12 +569,13 @@ public class OAuthMainController {
 		commit.getListCommitUps().add(new CommitUp(email));
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(commitHash.trim()));
-		
+
 		Update update = new Update();
-		//List<CommitUp> listCommitUps = commit.getListCommitUps().add(new CommitUp(email));
+		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
+		// CommitUp(email));
 		update.set("listCommitUps", commit.getListCommitUps());
-		mongoTemplate.upsert(query,  update, Commit.class, "commits");
-		//commitRepository.save(commit);
+		mongoTemplate.upsert(query, update, Commit.class, "commits");
+		// commitRepository.save(commit);
 
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
@@ -605,15 +612,16 @@ public class OAuthMainController {
 				.where("_id").is(commitHash.trim())), Commit.class, "commits");
 
 		commit.getListCommitDowns().add(new CommitDown(email));
-		//commitRepository.save(commit);
-		
+		// commitRepository.save(commit);
+
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(commitHash.trim()));
-		
+
 		Update update = new Update();
-		//List<CommitUp> listCommitUps = commit.getListCommitUps().add(new CommitUp(email));
+		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
+		// CommitUp(email));
 		update.set("listCommitDowns", commit.getListCommitDowns());
-		mongoTemplate.upsert(query,  update, Commit.class, "commits");
+		mongoTemplate.upsert(query, update, Commit.class, "commits");
 
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
@@ -627,83 +635,86 @@ public class OAuthMainController {
 
 	// addComment
 	@RequestMapping(value = "/addComment/{commitHash}/{email}/", method = RequestMethod.POST)
-	public String addComment(@ModelAttribute("commitComment") CommitComment commitComment,
+	public String addComment(
+			@ModelAttribute("commitComment") CommitComment commitComment,
 			@PathVariable("commitHash") String commitHash,
-			@PathVariable("email") String email,
-			ModelMap model) {
-		
+			@PathVariable("email") String email, ModelMap model) {
 
-			
-			//Get the commit and update with comment
-		
-			//Get all the comments related to this commit
+		// Get the commit and update with comment
+
+		// Get all the comments related to this commit
 		// Get the list of files
 		MongoTemplate mongoTemplate = null;
-		
+
 		try {
 			mongoTemplate = mongoConfiguration.mongoTemplate();
-			//mongoTemplate.get
+			// mongoTemplate.get
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
 				.where("_id").is(commitHash.trim())), Commit.class, "commits");
-		
-		if((commitComment.getComment() == null) || (commitComment.getComment().equals(""))){
+
+		if ((commitComment.getComment() == null)
+				|| (commitComment.getComment().equals(""))) {
 			// commitRepository.
 			model.addAttribute("commitMessage", commit.getMessage());
 			// model.addAttribute("theFiles", commit.getCommitFiles());
 			model.addAttribute("listTheCommits", commitRepository.findAll());
-			
+
 			List<CommitComment> theCommentList = commit.getCommitCommentList();
-			
+
 			if ((theCommentList != null) && (theCommentList.size() > 0))
 				Collections.reverse(theCommentList);
 			model.addAttribute("commitCommentList", theCommentList);
 			model.addAttribute("commitHash", commitHash);
 			model.addAttribute("userLogin", model.get("userLogin"));
-			
+
 			model.addAttribute("theFiles", commit.getCommitFiles());
-			commitComment = new CommitComment("", commitHash, email, new Date(Calendar.getInstance().getTimeInMillis()));
+			commitComment = new CommitComment("", commitHash, email, new Date(
+					Calendar.getInstance().getTimeInMillis()));
 			model.addAttribute("commitComment", commitComment);
-			
+
 			return "DiffPage";
 		}
 
-		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(commitHash.trim()));
-		
-		if (commit.getCommitCommentList() == null){
+
+		if (commit.getCommitCommentList() == null) {
 			commit.setCommitCommentList(new ArrayList<CommitComment>());
 		}
-		
-		commit.getCommitCommentList().add(new CommitComment(commitComment.getComment(), commitHash, email, new Date(Calendar.getInstance().getTimeInMillis())));
-		
+
+		commit.getCommitCommentList().add(
+				new CommitComment(commitComment.getComment(), commitHash,
+						email, new Date(Calendar.getInstance()
+								.getTimeInMillis())));
+
 		Update update = new Update();
-		//List<CommitUp> listCommitUps = commit.getListCommitUps().add(new CommitUp(email));
+		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
+		// CommitUp(email));
 		update.set("commitCommentList", commit.getCommitCommentList());
-		mongoTemplate.upsert(query,  update, Commit.class, "commits");
+		mongoTemplate.upsert(query, update, Commit.class, "commits");
 
 		// commitRepository.
 		model.addAttribute("commitMessage", commit.getMessage());
 		// model.addAttribute("theFiles", commit.getCommitFiles());
 		model.addAttribute("listTheCommits", commitRepository.findAll());
-		
+
 		List<CommitComment> theCommentList = commit.getCommitCommentList();
-		
+
 		if ((theCommentList != null) && (theCommentList.size() > 0))
 			Collections.reverse(theCommentList);
 		model.addAttribute("commitCommentList", theCommentList);
 		model.addAttribute("commitHash", commitHash);
 		model.addAttribute("userLogin", model.get("userLogin"));
-		
+
 		model.addAttribute("theFiles", commit.getCommitFiles());
-		commitComment = new CommitComment("", commitHash, email, new Date(Calendar.getInstance().getTimeInMillis()));
+		commitComment = new CommitComment("", commitHash, email, new Date(
+				Calendar.getInstance().getTimeInMillis()));
 		model.addAttribute("commitComment", commitComment);
-		
-		
+
 		return "DiffPage";
 	}
 
