@@ -18,10 +18,15 @@
     
      <td><strong></strong></td>
      <td></td>
-     <td><strong>Status</strong></td>
-     <td><strong>File Name</strong></td>
+     <td><strong>Login</strong></td>
+     <td><strong>Email</strong></td>
+     
+     <td><strong>First Name</strong></td>
+     <td><strong>Middle Name</strong></td>
+     <td><strong>Last Name</strong></td>
+     
       <td><strong></strong></td>
-      <td><strong>Diff</strong></td>
+      <td><strong>Client ID</strong></td>
     </tr>
   <c:forEach items="${usersList}" var="user">
 
@@ -30,6 +35,12 @@
       <td></td>
      <td><c:out value="${user.login}" /></td>
      <td><c:out value="${user.email}" /></td>
+     <td><c:out value="${user.firstName}" /></td>
+     
+     <td><c:out value="${user.middleName}" /></td>
+     <td><c:out value="${user.lastName}" /></td>
+     
+     
      <td></td>
      <!-- td><c:out value="${commit.hash}" /></td -->
      <td><c:out value="${user.clientId}" /></td>
@@ -38,19 +49,20 @@
   </c:forEach>
 </table>
 
-<h1>Add User</h1>
+<h1>Update Users</h1>
+<c:forEach items="${usersList}" var="user">
 										<form:form name="userProfile" action='/addUser/' method='POST' commandName="userProfile" >
 												<fieldset>
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<form:input type="text" class="form-control" name="email" path="email" placeholder="Email" />
+															<form:input type="text" class="form-control" name="email" path="email" placeholder="${user.email}" />
 															<i class="ace-icon fa fa-user"></i>
 														</span>
 													</label>
 													
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<form:input type="text" class="form-control" name="login" path="login" placeholder="Login"/>
+															<form:input type="text" class="form-control" name="login" path="login" placeholder="${user.login}"/>
 															
 															<i class="ace-icon fa fa-user"></i>
 														</span>
@@ -59,7 +71,7 @@
 													
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<form:input type="text" class="form-control" name="clientId" path="clientId" placeholder="Client Id"/>
+															<form:input type="text" class="form-control" name="clientId" path="clientId" placeholder="${user.clientId}"/>
 															
 															<i class="ace-icon fa fa-user"></i>
 														</span>
@@ -67,23 +79,28 @@
 													
 													<label class="block clearfix">
 														<span class="block input-icon input-icon-right">
-															<form:input type="text" class="form-control" name="clientSecret" path="clientSecret" placeholder="Client Secret"/>
+															<form:input type="text" class="form-control" name="clientSecret" path="clientSecret" placeholder="${user.clientSecret}"/>
 															
 															<i class="ace-icon fa fa-user"></i>
 														</span>
 													</label>
 													
 
-													<div class="space"></div>
+													<!-- div class="space"></div>
 
 													<div class="clearfix">
 														
 														<button > <b>Post</b></button></p>
-													</div>
+													</div -->
+													<label class="block clearfix">
+														<button > <b>Update</b></button></p>
+													</label>
 
 													<div class="space-4"></div>
 												</fieldset>
 											</form:form>
+ </c:forEach>											
+											
 											
 <table>
 	 <tr>

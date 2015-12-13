@@ -46,7 +46,6 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -85,7 +84,7 @@ public class OAuthMainController {
 
 	@Autowired
 	private CommitRepository commitRepository;
-	
+
 	@Autowired
 	private UserProfileRepository userProfileRepository;
 
@@ -775,8 +774,8 @@ public class OAuthMainController {
 
 		return null;
 	}
-	
-	//To the user profile
+
+	// To the user profile
 	// Get the Diff for a commit
 	@RequestMapping(value = "/myprofile/{email}/", method = RequestMethod.GET)
 	public String myprofile(
@@ -787,7 +786,7 @@ public class OAuthMainController {
 			// Go back to the main page
 			model.addAttribute(new UserProfile());
 			// return "main";
-			//return "GitOAuthPage";
+			// return "GitOAuthPage";
 			return "redirect:/logout";
 		}
 
@@ -801,48 +800,46 @@ public class OAuthMainController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//If there is no user profile for this user then create on in the database with
-		//login and email
+
+		// If there is no user profile for this user then create on in the
+		// database with
+		// login and email
 		UserProfile userProfileItem = null;
 
-		userProfileItem = mongoTemplate.findOne(new Query(Criteria.where("email")
-				.is(email.trim())), UserProfile.class,
-				"users");
-		
-		if (userProfileItem == null){
-			//Create a User Profile
+		userProfileItem = mongoTemplate.findOne(
+				new Query(Criteria.where("email").is(email.trim())),
+				UserProfile.class, "users");
+
+		if (userProfileItem == null) {
+			// Create a User Profile
 			userProfileItem = new UserProfile(null, email, null, null);
 			userProfileRepository.insert(userProfileItem);
-			
-			//.insert(new UserProfile(null, email, null, null));
+
+			// .insert(new UserProfile(null, email, null, null));
 		}
-		
-		
-		
-//		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
-//				.where("_id").is(commitHash.trim())), Commit.class, "commits");
+
+		// Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+		// .where("_id").is(commitHash.trim())), Commit.class, "commits");
 
 		// commitRepository.
 		model.addAttribute("email", email);
 		model.addAttribute("user", userProfileItem);
 		model.addAttribute("repositories", new ArrayList<String>());
-		
 
-		//UserProfile newUserProfile = new UserProfile();
+		// UserProfile newUserProfile = new UserProfile();
 
 		model.addAttribute(userProfileItem);
 
 		return "MyProfile";
 
 	}
-	
+
 	/***
 	 * @author Japheth Odonya
 	 * @When Dec 13, 2015 2:39:12 PM
 	 * 
-	 * Purpose : Managing User Profiles
-	 * 			Use User Email and the pertaining details
+	 *       Purpose : Managing User Profiles Use User Email and the pertaining
+	 *       details
 	 * */
 	@RequestMapping(value = "/userprofiles/{email}/", method = RequestMethod.GET)
 	public String userprofiles(
@@ -853,7 +850,7 @@ public class OAuthMainController {
 			// Go back to the main page
 			model.addAttribute(new UserProfile());
 			// return "main";
-			//return "GitOAuthPage";
+			// return "GitOAuthPage";
 			return "redirect:/logout";
 		}
 
@@ -867,23 +864,26 @@ public class OAuthMainController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
-//				.where("_id").is(commitHash.trim())), Commit.class, "commits");
+		// Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+		// .where("_id").is(commitHash.trim())), Commit.class, "commits");
 
 		// commitRepository.
+		
+		 List<UserProfile> usersList = (List<UserProfile>) mongoTemplate.find(null, UserProfile.class, "users");
 
 		model.addAttribute("email", email);
+		model.addAttribute("usersList", usersList);
 
 		UserProfile newUserProfile = new UserProfile();
 
 		model.addAttribute(newUserProfile);
-
+		//usersList
 		return "UserProfiles";
 
 	}
-	
-	//Update user profile
-	//updateUserProfile
+
+	// Update user profile
+	// updateUserProfile
 	@RequestMapping(value = "/updateUserProfile/{email}/", method = RequestMethod.POST)
 	public String updateUserProfile(
 			@ModelAttribute("userProfile") UserProfile userProfile,
@@ -893,18 +893,22 @@ public class OAuthMainController {
 			// Go back to the main page
 			model.addAttribute(new UserProfile());
 			// return "main";
-			//return "GitOAuthPage";
+			// return "GitOAuthPage";
 			return "redirect:/logout";
 		}
 
 		System.out.println("The email passed across is ... " + email);
-		
+
 		System.out.println("Updated User Values ... ");
-		
-		System.out.println("Updated User Values Email ... "+userProfile.getEmail());
-		System.out.println("Updated User Values Login ... "+userProfile.getLogin());
-		System.out.println("Updated User Values Client ID ... "+userProfile.getClientId());
-		System.out.println("Updated User Values Client Secret... "+userProfile.getClientSecret());
+
+		System.out.println("Updated User Values Email ... "
+				+ userProfile.getEmail());
+		System.out.println("Updated User Values Login ... "
+				+ userProfile.getLogin());
+		System.out.println("Updated User Values Client ID ... "
+				+ userProfile.getClientId());
+		System.out.println("Updated User Values Client Secret... "
+				+ userProfile.getClientSecret());
 
 		// Get the list of files
 		MongoTemplate mongoTemplate = null;
@@ -919,13 +923,13 @@ public class OAuthMainController {
 		model.addAttribute("email", email);
 		model.addAttribute(userProfile);
 
-		return "redirect:/myprofile/"+email+"/";
+		return "redirect:/myprofile/" + email + "/";
 
 	}
 
 	private void updateUserProfile(UserProfile userProfile) {
 		// TODO Auto-generated method stub
-		
+
 		MongoTemplate mongoTemplate = null;
 		try {
 			mongoTemplate = mongoConfiguration.mongoTemplate();
@@ -934,39 +938,22 @@ public class OAuthMainController {
 			e.printStackTrace();
 		}
 		
-		//Find the entity and then update it
-//		UserProfile newUser = (UserProfile) mongoTemplate.findOne(new Query(Criteria
-//		.where("_id").is(userProfile.getEmail().trim())), UserProfile.class, "users");
-		
-		//Get the object using id
-		// DBObject dbObj = mongoTemplate.findOne(new Query(Criteria
-		//			.where("email").is(userProfile.getEmail().trim())), DBObject.class, "users");
-		 
-		DBCollection usersCollection =  mongoTemplate.getCollection("users");
-		//usersCollection.findOne(new DBO)
-//		 
-//		Map<String, String> objectmap = dbObj.;
-//		
-//		for (String key : objectmap.keySet()) {
-//			System.out.println(" key ... "+key);
-//			
-//		}
-		
+		DBCollection usersCollection = mongoTemplate.getCollection("users");
 		// String id = (String)dbObj.get("_id");
 		String userEmail = userProfile.getEmail().trim();
 		String id = "";
 		BasicDBObject query = new BasicDBObject();
 		BasicDBObject field = new BasicDBObject();
 		field.put("email", userEmail);
-		DBCursor cursor = usersCollection.find(query,field);
+		DBCursor cursor = usersCollection.find(query, field);
 		while (cursor.hasNext()) {
-		    BasicDBObject obj = (BasicDBObject) cursor.next();
-		    id = obj.getString("_id");
-		   // result.add(obj.getString("HomeTown"));
+			BasicDBObject obj = (BasicDBObject) cursor.next();
+			id = obj.getString("_id");
+			// result.add(obj.getString("HomeTown"));
 		}
-		
-		System.out.println("The query user _id is "+id);
-	
+
+		System.out.println("The query user _id is " + id);
+
 		Query updateQuery = new Query();
 		updateQuery.addCriteria(Criteria.where("_id").is(id));
 
@@ -974,19 +961,17 @@ public class OAuthMainController {
 		update.set("_id", id);
 		update.set("email", userEmail);
 		update.set("login", userProfile.getLogin());
-		
+
 		update.set("firstName", userProfile.getFirstName());
 		update.set("middleName", userProfile.getMiddleName());
 		update.set("lastName", userProfile.getLastName());
-		
+
 		update.set("clientId", userProfile.getClientId());
 		update.set("clientSecret", userProfile.getClientSecret());
 		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
 		// CommitUp(email));
 		mongoTemplate.upsert(updateQuery, update, UserProfile.class, "users");
-		
-	}
 
-	
+	}
 
 }
