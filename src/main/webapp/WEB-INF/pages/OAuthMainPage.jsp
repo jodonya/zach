@@ -15,6 +15,9 @@
 </div>
 <div><a href="<c:out value="/myprofile/${email}/"/>"> Profile</a> </h1></div>
 <div><a href="<c:out value="/userprofiles/${email}/"/>"> User Profiles (Admin)</a> </h1></div>
+<br>
+
+<div><a href="<c:out value="/pullcommits"/>"> Pull Commits</a></h1></div>
 <div style="clear:both;"></div>
 <h4> </h4>
 <table>
@@ -48,6 +51,20 @@
 
     </tr>
   </c:forEach>
+  
+  <tr>
+    
+     <td><strong></strong></td>
+     <td></td>
+     <td><strong></strong></td>
+     <td><strong></strong></td>
+      <td><strong></strong></td>
+      <td><strong>${count} Commits</strong></td>
+      <td></td>
+      <td></td>
+       <td></td>
+      <td></td>
+    </tr>
 </table>
 </body>
 </html>

@@ -434,6 +434,8 @@ public class OAuthMainController {
 
 		}
 
+		Long countCommits = commitRepository.count();
+		model.addAttribute("count", countCommits);
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("email", email);
 		model.addAttribute("accessToken", accessToken);
@@ -972,6 +974,22 @@ public class OAuthMainController {
 		// CommitUp(email));
 		mongoTemplate.upsert(updateQuery, update, UserProfile.class, "users");
 
+	}
+	
+	//Pulling Commits
+	//pullcommits
+	/****
+	 * @author Japheth Odonya
+	 * @When Dec 13, 2015 8:07:00 PM
+	 * 
+	 * For pulling commits while logged in
+	 * */
+	@RequestMapping(value = { "/pullcommits" }, method = RequestMethod.GET)
+	public String pullcommits(@RequestParam Map<String, String> allRequestParams,
+			ModelMap model) {
+		
+		System.out.println("RRRRRRRR Redirecting Commits !!!");
+		return "redirect:/login";
 	}
 
 }
