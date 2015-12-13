@@ -7,6 +7,7 @@
 <div>
 <div><h4>Manage User Profiles</h1></div>
 <div><a href="<c:out value="/logout"/>"> Logout</a></h1></div>
+<div><a href="<c:out value="/login/"/>"> Home</a> </h1></div>
 </div>
 <div style="clear:both;"></div>
 <h4> </h4>

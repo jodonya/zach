@@ -8,7 +8,9 @@
 <div><h4>Diff User Mail: ${email}</h1></div>
 <div><a href="<c:out value="/logout"/>"> Logout</a> </h1></div>
 </div>
-<div><a href="<c:out value="/profile"/>"> Profile</a> </h1></div>
+<div><a href="<c:out value="/myprofile/${email}/"/>"> Profile</a> </h1></div>
+
+<div><a href="<c:out value="/login/"/>"> Home</a> </h1></div>
 <div style="clear:both;"></div>
 <h4> </h4>
 
