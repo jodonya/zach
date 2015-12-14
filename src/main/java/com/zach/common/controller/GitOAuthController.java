@@ -1,6 +1,5 @@
 package com.zach.common.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,18 +14,18 @@ import com.zach.model.UserLogin;
 //extends AbstractController 
 public class GitOAuthController {
 	
-	@Value("${clientid}")
-	private String CLIENTID;
+//	@Value("${clientid}")
+//	private String CLIENTID;
 
 	
 	@RequestMapping(value = "/old", method = RequestMethod.GET)
 	public String main(ModelMap model) {
 		model.addAttribute(new UserLogin());
-		model.addAttribute("clientId", CLIENTID);
+		model.addAttribute("clientId", "");
 		
 		//if (model)
 		
-		System.out.println("Client Id is ### "+CLIENTID);
+		System.out.println("Client Id is ### "+"");
 		//return "main";
 		return "GitOAuthPage";
 

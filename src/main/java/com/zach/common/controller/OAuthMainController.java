@@ -15,13 +15,9 @@ import javax.ws.rs.core.UriBuilder;
 import org.json.JSONObject;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCommit.File;
-import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.PagedIterable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -35,14 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
-import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -53,6 +41,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.zach.common.config.MongoConfiguration;
+import com.zach.model.AppClient;
 import com.zach.model.Commit;
 import com.zach.model.CommitComment;
 import com.zach.model.CommitDown;
@@ -60,27 +49,28 @@ import com.zach.model.CommitFile;
 import com.zach.model.CommitUp;
 import com.zach.model.UserLogin;
 import com.zach.model.UserProfile;
+import com.zach.repository.ClientRepository;
 import com.zach.repository.CommitRepository;
 import com.zach.repository.UserProfileRepository;
 
 /***
  * @author Japheth Odonya
  * */
-@SessionAttributes({ "email", "accessToken", "code" })
+@SessionAttributes({ "email", "accessToken", "code", "clientId" })
 @Controller
 public class OAuthMainController {
 
-	@Value("${token}")
-	private String OAUTHACCESSTOKE;
-
-	@Value("${clientid}")
-	private String CLIENTID;
-
-	@Value("${clientsecret}")
-	private String CLIENTSECRET;
-
-	@Value("${organizationname}")
-	private String ORGANIZATIONNAME;
+	// @Value("${token}")
+	// private String OAUTHACCESSTOKE;
+	//
+	// @Value("${clientid}")
+	// private String CLIENTID;
+	//
+	// @Value("${clientsecret}")
+	// private String CLIENTSECRET;
+	//
+	// @Value("${organizationname}")
+	// private String ORGANIZATIONNAME;
 
 	@Autowired
 	private CommitRepository commitRepository;
@@ -89,167 +79,10 @@ public class OAuthMainController {
 	private UserProfileRepository userProfileRepository;
 
 	@Autowired
+	private ClientRepository clientRepository;
+
+	@Autowired
 	MongoConfiguration mongoConfiguration;
-
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public String mainLogin(@ModelAttribute("userLogin") UserLogin userLogin,
-			ModelMap model) {
-		if ((userLogin.getEmail() != null)
-				&& (!userLogin.getEmail().equals(""))) {
-			System.out.println("TTTTTTT The mail is " + userLogin.getEmail());
-			model.addAttribute("email", userLogin.getEmail());
-		}
-
-		System.out.println(" #### the email is " + userLogin.getEmail());
-
-		if ((model.get("email") == null) || model.get("email").equals("")) {
-			// Go back to the main page
-			model.addAttribute(new UserLogin());
-			// return "main";
-			return "GitOAuthPage";
-		}
-
-		// Accessing Github page starts here
-		JsonFactory jsonFactory = new JacksonFactory();
-		HttpTransport httpTransport = new NetHttpTransport();
-
-		// AuthorizationCodeGrant
-		// AuthorizationCodeGrant grant = new AuthorizationCodeGrant()
-		AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(
-				BearerToken.authorizationHeaderAccessMethod(), httpTransport,
-				jsonFactory, new GenericUrl(
-						"https://github.com/login/oauth/access_token"),
-				new ClientParametersAuthentication(CLIENTID, CLIENTSECRET),
-				CLIENTID, "https://github.com/login/oauth/authorize").build();
-
-		// TokenResponse tokeResponse = flow.newTokenRequest(code)
-
-		// Accessing Github page ends here
-
-		// Connecting to Github using the GitHub API
-		GitHub github = null;
-		try {
-			github = GitHub.connectUsingOAuth(OAUTHACCESSTOKE);
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
-		GHOrganization ghOrganization = null;
-		try {
-			ghOrganization = github.getOrganization(ORGANIZATIONNAME);
-
-			// github.getOrganization(ORGANIZATIONNAME);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		// .get(new Coordinates.Simple(ORGANIZATIONNAME)).;
-		//
-		Map<String, GHRepository> mapRepositories = null;
-		try {
-			mapRepositories = ghOrganization.getRepositories();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		List<Commit> listTheCommits = new ArrayList<Commit>();
-		int sequence = 0;
-		List<GHCommit> listCommits = null;
-		;
-		for (Map.Entry<String, GHRepository> repository : mapRepositories
-				.entrySet()) {
-			System.out.println("Repository ... "
-					+ repository.getValue().getName());
-
-			System.out.println("Home page : "
-					+ repository.getValue().getHomepage());
-			System.out.println("Repo URL : " + repository.getValue().getUrl());
-
-			System.out.println();
-			listCommits = repository.getValue().listCommits().asList();
-			for (GHCommit ghCommit : listCommits) {
-				sequence++;
-				try {
-					// ghCommit.getLastStatus().
-					System.out.println("Commit # " + sequence + " Author "
-							+ ghCommit.getAuthor().getLogin() + " message "
-							+ ghCommit.getCommitShortInfo().getMessage()
-							+ " hash " + ghCommit.getSHA1());
-					listTheCommits.add(new Commit(ghCommit.getAuthor()
-							.getLogin(), ghCommit.getCommitShortInfo()
-							.getMessage(), ghCommit.getSHA1(), repository
-							.getValue().getName()));
-
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				MongoTemplate mongoTemplate = null;
-				try {
-					mongoTemplate = mongoConfiguration.mongoTemplate();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				Commit item = null;
-
-				item = mongoTemplate.findOne(new Query(Criteria.where("_id")
-						.is(ghCommit.getSHA1().trim())), Commit.class,
-						"commits");
-				try {
-					if (item == null) {
-						// Build the changes
-						GHCommit anotherCommit = repository.getValue()
-								.getCommit(ghCommit.getSHA1());
-						List<CommitFile> listFiles = new ArrayList<CommitFile>();
-
-						for (File file : anotherCommit.getFiles()) {
-							if (file.getPatch() != null) {
-								listFiles.add(new CommitFile(
-										file.getFileName(), file.getStatus(),
-										file.getPatch()));
-							}
-						}
-
-						commitRepository.insert(new Commit(ghCommit.getSHA1(),
-								ghCommit.getAuthor().getLogin(), ghCommit
-										.getCommitShortInfo().getMessage(),
-								ghCommit.getSHA1(), repository.getValue()
-										.getName(), listFiles,
-								new ArrayList<CommitUp>(),
-								new ArrayList<CommitDown>()));
-					} else {
-						System.out.println(" The item already exists !!!  "
-								+ ghCommit.getSHA1());
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-		}
-
-		PagedIterable<GHUser> listUsers = null;
-		try {
-			listUsers = ghOrganization.listMembers();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		int count = 0;
-		for (GHUser ghUser : listUsers.asList()) {
-			count++;
-			System.out.println("Member number " + count + " is " + ghUser);
-
-		}
-
-		model.addAttribute("listTheCommits", commitRepository.findAll());
-		model.addAttribute("email", userLogin.getEmail());
-		model.addAttribute("userLogin", userLogin);
-		return "OAuthMainPage";
-	}
 
 	/**
 	 * @author Japheth Odonya
@@ -298,14 +131,14 @@ public class OAuthMainController {
 			e2.printStackTrace();
 		}
 
-		GHOrganization ghOrganization = null;
-		try {
-			ghOrganization = github.getOrganization(ORGANIZATIONNAME);
-
-			// github.getOrganization(ORGANIZATIONNAME);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		// GHOrganization ghOrganization = null;
+		// try {
+		// ghOrganization = github.getOrganization(ORGANIZATIONNAME);
+		//
+		// // github.getOrganization(ORGANIZATIONNAME);
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 		// .get(new Coordinates.Simple(ORGANIZATIONNAME)).;
 		//
 		Map<String, GHRepository> mapRepositories = null;
@@ -420,24 +253,25 @@ public class OAuthMainController {
 
 		}
 
-		PagedIterable<GHUser> listUsers = null;
-		try {
-			listUsers = ghOrganization.listMembers();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		int count = 0;
-		for (GHUser ghUser : listUsers.asList()) {
-			count++;
-			System.out.println("Member number " + count + " is " + ghUser);
-
-		}
+		// PagedIterable<GHUser> listUsers = null;
+		// try {
+		// listUsers = ghOrganization.listMembers();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		//
+		// int count = 0;
+		// for (GHUser ghUser : listUsers.asList()) {
+		// count++;
+		// System.out.println("Member number " + count + " is " + ghUser);
+		//
+		// }
 
 		Long countCommits = commitRepository.count();
 		model.addAttribute("count", countCommits);
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("email", email);
+		model.addAttribute("clientId", getClientId());
 		model.addAttribute("accessToken", accessToken);
 		return "OAuthMainPage";
 	}
@@ -453,8 +287,8 @@ public class OAuthMainController {
 		WebResource webResource = client.resource(UriBuilder.fromUri(
 				"https://github.com/login/oauth/access_token").build());
 		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
-		formData.add("client_id", CLIENTID);
-		formData.add("client_secret", CLIENTSECRET);
+		formData.add("client_id", getClientId());
+		formData.add("client_secret", getClientSecretId());
 		formData.add("code", code);
 		formData.add("accept", "json");
 
@@ -473,6 +307,30 @@ public class OAuthMainController {
 
 		accessToken = json.getString("access_token").trim();
 		return accessToken;
+	}
+
+	private String getClientSecretId() {
+
+		// Get active client id
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// If there is no user profile for this user then create on in the
+		// database with
+		// login and email
+		AppClient client;
+
+		client = mongoTemplate.findOne(
+				new Query(Criteria.where("active").is("ACTIVE")),
+				AppClient.class, "clients");
+
+		return client.getClientSecret();
 	}
 
 	/****
@@ -742,15 +600,41 @@ public class OAuthMainController {
 			return "redirect:/login";
 		}
 
+		String clientId = getClientId();
+
 		model.addAttribute(new UserLogin());
-		model.addAttribute("clientId", CLIENTID);
+		model.addAttribute("clientId", clientId);
 
 		// if (model)
 
-		System.out.println("Client Id is ### " + CLIENTID);
+		System.out.println("Client Id is ### " + clientId);
 		// return "main";
 		return "GitOAuthPage";
 
+	}
+
+	private String getClientId() {
+
+		// Get active client id
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// If there is no user profile for this user then create on in the
+		// database with
+		// login and email
+		AppClient client;
+
+		client = mongoTemplate.findOne(
+				new Query(Criteria.where("active").is("ACTIVE")),
+				AppClient.class, "clients");
+
+		return client.getClientId();
 	}
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
@@ -762,6 +646,9 @@ public class OAuthMainController {
 		model.addAttribute("accessToken", "");
 		model.addAttribute("email", "");
 		model.addAttribute("code", "");
+		//model.addAttribute("clientId", "");
+		
+		
 
 		return "redirect:/";
 
@@ -870,8 +757,9 @@ public class OAuthMainController {
 		// .where("_id").is(commitHash.trim())), Commit.class, "commits");
 
 		// commitRepository.
-		
-		 List<UserProfile> usersList = (List<UserProfile>) mongoTemplate.find(null, UserProfile.class, "users");
+
+		List<UserProfile> usersList = (List<UserProfile>) mongoTemplate.find(
+				null, UserProfile.class, "users");
 
 		model.addAttribute("email", email);
 		model.addAttribute("usersList", usersList);
@@ -879,7 +767,7 @@ public class OAuthMainController {
 		UserProfile newUserProfile = new UserProfile();
 
 		model.addAttribute(newUserProfile);
-		//usersList
+		// usersList
 		return "UserProfiles";
 
 	}
@@ -939,7 +827,7 @@ public class OAuthMainController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		DBCollection usersCollection = mongoTemplate.getCollection("users");
 		// String id = (String)dbObj.get("_id");
 		String userEmail = userProfile.getEmail().trim();
@@ -975,21 +863,160 @@ public class OAuthMainController {
 		mongoTemplate.upsert(updateQuery, update, UserProfile.class, "users");
 
 	}
-	
-	//Pulling Commits
-	//pullcommits
+
+	// Pulling Commits
+	// pullcommits
 	/****
 	 * @author Japheth Odonya
 	 * @When Dec 13, 2015 8:07:00 PM
 	 * 
-	 * For pulling commits while logged in
+	 *       For pulling commits while logged in
 	 * */
 	@RequestMapping(value = { "/pullcommits" }, method = RequestMethod.GET)
-	public String pullcommits(@RequestParam Map<String, String> allRequestParams,
-			ModelMap model) {
-		
+	public String pullcommits(
+			@RequestParam Map<String, String> allRequestParams, ModelMap model) {
+
 		System.out.println("RRRRRRRR Redirecting Commits !!!");
 		return "redirect:/login";
+	}
+
+	// clientprofile
+	/****
+	 * @author Japheth Odonya
+	 * @When Dec 14, 2015 9:41:23 AM
+	 * 
+	 *       Client Profile / for adding and updating the client information
+	 * */
+	@RequestMapping(value = "/clientprofile/{clientId}/", method = RequestMethod.GET)
+	public String clientprofile(@ModelAttribute("client") Client client,
+			@PathVariable("clientId") String clientId, ModelMap model) {
+		// checkLogedIn(model);
+
+		System.out.println("The Client ID  is ... " + clientId);
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// If there is no Client Profile for this Client then create on in the
+		// database with
+		// login and email
+		AppClient clientItem = null;
+
+		clientItem = mongoTemplate.findOne(new Query(Criteria.where("clientId")
+				.is(clientId.trim())), AppClient.class, "clients");
+
+		if (clientItem == null) {
+			// Create a User Profile
+			clientItem = new AppClient(clientId, null, "ACTIVE");
+			// userProfileRepository.insert(userProfileItem);
+			clientRepository.insert(clientItem);
+			// .insert(new UserProfile(null, email, null, null));
+		}
+
+		// Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+		// .where("_id").is(commitHash.trim())), Commit.class, "commits");
+
+		// commitRepository.
+		model.addAttribute("client", clientItem);
+		model.addAttribute("repositories", new ArrayList<String>());
+
+		// UserProfile newUserProfile = new UserProfile();
+
+		model.addAttribute(clientItem);
+
+		return "ClientProfile";
+
+	}
+
+	// updateClient
+	/***
+	 * @author Japheth Odonya
+	 * @When Dec 14, 2015 11:14:59 AM
+	 * 
+	 *       Updating client information
+	 * */
+	@RequestMapping(value = "/updateClient", method = RequestMethod.POST)
+	public String updateClient(@ModelAttribute("client") AppClient client,
+			ModelMap model) {
+
+		System.out.println("The client id passed across is ... "
+				+ client.getClientId());
+
+		System.out.println("Updated Client Values ... ");
+
+		System.out.println("Updated Client Values clientId ... "
+				+ client.getClientId());
+		System.out.println("Updated Client Values clientSecret ... "
+				+ client.getClientSecret());
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		updateClient(client);
+
+		model.addAttribute(client);
+
+		return "redirect:/clientprofile/" + client.getClientId() + "/";
+
+	}
+
+	private void updateClient(AppClient client) {
+		// TODO Auto-generated method stub
+
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		DBCollection usersCollection = mongoTemplate.getCollection("clients");
+		// String id = (String)dbObj.get("_id");
+		String clientId = client.getClientId().trim();
+		String id = "";
+		BasicDBObject query = new BasicDBObject();
+		BasicDBObject field = new BasicDBObject();
+		field.put("clientId", clientId);
+		DBCursor cursor = usersCollection.find(query, field);
+		while (cursor.hasNext()) {
+			BasicDBObject obj = (BasicDBObject) cursor.next();
+			id = obj.getString("_id");
+			// result.add(obj.getString("HomeTown"));
+		}
+
+		System.out.println("The query user _id is " + id);
+
+		Query updateQuery = new Query();
+		updateQuery.addCriteria(Criteria.where("_id").is(id));
+
+		Update update = new Update();
+
+		if ((id != null) && (!id.equals(""))) {
+			update.set("_id", id);
+		}
+
+		update.set("clientId", clientId);
+		update.set("active", client.getActive());
+		update.set("clientSecret", client.getClientSecret());
+
+		update.set("description", client.getDescription());
+
+		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
+		// CommitUp(email));
+		mongoTemplate.upsert(updateQuery, update, AppClient.class, "clients");
+
 	}
 
 }

@@ -60,6 +60,8 @@
 								</h1>
 								<h4 class="blue" id="id-company-text">&copy; Zach.</h4>
 							</div>
+							
+							<div><h1><a href="<c:out value="/clientprofile/${clientId}/"/>"> Set Client Profile</a> </h1></div>
 
 							<div class="space-6"></div>
 
