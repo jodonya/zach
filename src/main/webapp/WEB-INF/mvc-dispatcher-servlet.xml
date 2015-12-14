@@ -17,9 +17,7 @@
         <context:component-scan base-package="com.zach">
         </context:component-scan>
 
-        <context:property-placeholder location="classpath:accesstoken.properties" />
-
-	<bean
+ 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
 			<value>/WEB-INF/pages/</value>
