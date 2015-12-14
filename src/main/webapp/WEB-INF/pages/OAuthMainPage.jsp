@@ -41,8 +41,13 @@
      <td></td>
       <td></td>
      <td><c:out value="${commit.message}" /></td>
-     <td><c:out value="${commit.login}" /></td>
-     <td><c:out value="${commit.repository}" /></td>
+     <td>
+     	<a href="<c:out value="/usercommits/${commit.login}/"/>"> ${commit.login} Commits </a>
+     </td>
+     
+     <td>
+     	<a href="<c:out value="/repositorycommits/${commit.repository}/"/>"> ${commit.repository} Commits</a>
+     </td>
      <!-- td><c:out value="${commit.hash}" /></td -->
      <td><a href="<c:out value="/diff/${commit.hash}/${email}/"/>"> Diff</a> </td>
      <td><c:out value="     " /></td>

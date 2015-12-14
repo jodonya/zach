@@ -51,6 +51,7 @@ import com.zach.model.UserLogin;
 import com.zach.model.UserProfile;
 import com.zach.repository.ClientRepository;
 import com.zach.repository.CommitRepository;
+import com.zach.repository.CommitRepositoryCustom;
 import com.zach.repository.UserProfileRepository;
 
 /***
@@ -59,19 +60,6 @@ import com.zach.repository.UserProfileRepository;
 @SessionAttributes({ "email", "accessToken", "code", "clientId" })
 @Controller
 public class OAuthMainController {
-
-	// @Value("${token}")
-	// private String OAUTHACCESSTOKE;
-	//
-	// @Value("${clientid}")
-	// private String CLIENTID;
-	//
-	// @Value("${clientsecret}")
-	// private String CLIENTSECRET;
-	//
-	// @Value("${organizationname}")
-	// private String ORGANIZATIONNAME;
-
 	@Autowired
 	private CommitRepository commitRepository;
 
@@ -80,6 +68,9 @@ public class OAuthMainController {
 
 	@Autowired
 	private ClientRepository clientRepository;
+	
+	@Autowired
+	private CommitRepositoryCustom commitRepositoryCustom;
 
 	@Autowired
 	MongoConfiguration mongoConfiguration;
@@ -311,7 +302,9 @@ public class OAuthMainController {
 
 		JSONObject json = new JSONObject(responseMessage);
 
-		accessToken = json.getString("access_token").trim();
+		if (json.get("access_token") != null)
+			accessToken = json.getString("access_token").trim();
+		
 		return accessToken;
 	}
 
@@ -1075,6 +1068,45 @@ public class OAuthMainController {
 		model.addAttribute(clientItem);
 
 		return "ClientProfile";
+
+	}
+	
+	//usercommits
+	// Get the Diff for a commit
+	@RequestMapping(value = "/usercommits/{login}/", method = RequestMethod.GET)
+	public String usercommits(
+			@PathVariable("login") String login,
+			 ModelMap model) {
+		checkLogedIn(model);
+		
+
+		System.out.println("The login is ... " + login);
+
+		Long countCommits = commitRepositoryCustom.countCommits(login);
+		model.addAttribute("count", countCommits);
+		model.addAttribute("listTheCommits", commitRepositoryCustom.getCommits(login));
+		
+
+		return "OAuthMainPage";
+
+	}
+	
+	//repositorycommits
+	@RequestMapping(value = "/repositorycommits/{repository}/", method = RequestMethod.GET)
+	public String repositorycommits(
+			@PathVariable("repository") String repository,
+			 ModelMap model) {
+		checkLogedIn(model);
+		
+
+		System.out.println("The Repository is ... " + repository);
+
+		Long countCommits = commitRepositoryCustom.countCommitsGivenRepository(repository);
+		model.addAttribute("count", countCommits);
+		model.addAttribute("listTheCommits", commitRepositoryCustom.getCommitsGivenRepository(repository));
+		
+
+		return "OAuthMainPage";
 
 	}
 
