@@ -271,7 +271,9 @@ public class OAuthMainController {
 		model.addAttribute("count", countCommits);
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("email", email);
-		model.addAttribute("clientId", getClientId());
+		
+		if (getClientId() != null)
+			model.addAttribute("clientId", getClientId());
 		model.addAttribute("accessToken", accessToken);
 		return "OAuthMainPage";
 	}
@@ -287,7 +289,8 @@ public class OAuthMainController {
 		WebResource webResource = client.resource(UriBuilder.fromUri(
 				"https://github.com/login/oauth/access_token").build());
 		MultivaluedMap<String, String> formData = new MultivaluedMapImpl();
-		formData.add("client_id", getClientId());
+		if (getClientId() != null)
+			formData.add("client_id", getClientId());
 		formData.add("client_secret", getClientSecretId());
 		formData.add("code", code);
 		formData.add("accept", "json");
@@ -603,7 +606,9 @@ public class OAuthMainController {
 		String clientId = getClientId();
 
 		model.addAttribute(new UserLogin());
-		model.addAttribute("clientId", clientId);
+		
+		if (getClientId() != null)
+			model.addAttribute("clientId", clientId);
 
 		// if (model)
 
@@ -634,6 +639,9 @@ public class OAuthMainController {
 				new Query(Criteria.where("active").is("ACTIVE")),
 				AppClient.class, "clients");
 
+		if (client == null)
+			return null;
+		
 		return client.getClientId();
 	}
 
@@ -1016,6 +1024,54 @@ public class OAuthMainController {
 		// List<CommitUp> listCommitUps = commit.getListCommitUps().add(new
 		// CommitUp(email));
 		mongoTemplate.upsert(updateQuery, update, AppClient.class, "clients");
+
+	}
+	
+	
+	@RequestMapping(value = "/clientprofile//", method = RequestMethod.GET)
+	public String clientprofileEmptyId(@ModelAttribute("client") Client client,
+			ModelMap model) {
+		// checkLogedIn(model);
+
+
+		// Get the list of files
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// If there is no Client Profile for this Client then create on in the
+		// database with
+		// login and email
+		AppClient clientItem = null;
+		String clientId = "";
+
+		clientItem = mongoTemplate.findOne(new Query(Criteria.where("clientId")
+				.is(clientId.trim())), AppClient.class, "clients");
+
+		if (clientItem == null) {
+			// Create a User Profile
+			clientItem = new AppClient(clientId, null, "ACTIVE");
+			// userProfileRepository.insert(userProfileItem);
+			clientRepository.insert(clientItem);
+			// .insert(new UserProfile(null, email, null, null));
+		}
+
+		// Commit commit = (Commit) mongoTemplate.findOne(new Query(Criteria
+		// .where("_id").is(commitHash.trim())), Commit.class, "commits");
+
+		// commitRepository.
+		model.addAttribute("client", clientItem);
+		model.addAttribute("repositories", new ArrayList<String>());
+
+		// UserProfile newUserProfile = new UserProfile();
+
+		model.addAttribute(clientItem);
+
+		return "ClientProfile";
 
 	}
 
