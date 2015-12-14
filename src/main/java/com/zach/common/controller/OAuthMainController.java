@@ -151,7 +151,7 @@ public class OAuthMainController {
 		}
 		List<Commit> listTheCommits = new ArrayList<Commit>();
 		int sequence = 0;
-		List<GHCommit> listCommits = null;
+		List<GHCommit> listCommits;
 		;
 		for (Map.Entry<String, GHRepository> repository : mapRepositories
 				.entrySet()) {
@@ -161,9 +161,12 @@ public class OAuthMainController {
 			System.out.println("Home page : "
 					+ repository.getValue().getHomepage());
 			System.out.println("Repo URL : " + repository.getValue().getUrl());
-
+			listCommits = null;
 			System.out.println();
-			listCommits = repository.getValue().listCommits().asList();
+			if (repository.getValue().listCommits() != null)
+				listCommits = repository.getValue().listCommits().asList();
+			
+			if (listCommits != null)
 			for (GHCommit ghCommit : listCommits) {
 				sequence++;
 				try {
