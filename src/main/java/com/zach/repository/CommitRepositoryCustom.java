@@ -13,6 +13,13 @@ public interface CommitRepositoryCustom {
 	
 	public Long countCommits(String login);
 	public Long countCommitsGivenRepository(String repository);
+	
+	public List<Commit> getCommits(String login, Long limit);
+	public List<Commit> getCommitsGivenRepository(String repository, Long limit);
+	
+	public List<Commit> getCommits(Long limit);
+	public List<Commit> getCommitsGivenRepository(Long limit);
+
 
 
 }

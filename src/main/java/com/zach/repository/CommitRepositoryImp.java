@@ -103,4 +103,75 @@ public class CommitRepositoryImp implements CommitRepositoryCustom {
 		
 	}
 
+	@Override
+	public List<Commit> getCommits(String login, Long limit) {
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+			// mongoTemplate.get
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<Commit> listCommits = null;
+		
+		listCommits = (List<Commit>) mongoTemplate.find(new Query(Criteria
+				.where("login").is(login)).limit(limit.intValue()), Commit.class, "commits");
+		
+		return listCommits;
+	}
+
+	@Override
+	public List<Commit> getCommitsGivenRepository(String repository, Long limit) {
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+			// mongoTemplate.get
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<Commit> listCommits = null;
+		
+		listCommits = (List<Commit>) mongoTemplate.find(new Query(Criteria
+				.where("repository").is(repository)).limit(limit.intValue()), Commit.class, "commits");
+		
+		return listCommits;
+	}
+	
+	
+	public List<Commit> getCommits(Long limit) {
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+			// mongoTemplate.get
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<Commit> listCommits = null;
+		
+		listCommits = (List<Commit>) mongoTemplate.find(new Query().limit(limit.intValue()), Commit.class, "commits");
+		
+		return listCommits;
+	}
+
+	@Override
+	public List<Commit> getCommitsGivenRepository(Long limit) {
+		MongoTemplate mongoTemplate = null;
+		try {
+			mongoTemplate = mongoConfiguration.mongoTemplate();
+			// mongoTemplate.get
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<Commit> listCommits = null;
+		
+		listCommits = (List<Commit>) mongoTemplate.find(new Query().limit(limit.intValue()), Commit.class, "commits");
+		
+		return listCommits;
+	}
+
+
 }

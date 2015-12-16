@@ -21,6 +21,10 @@ public class Commit {
 	private String message;
 	private String hash;
 	private String repository;
+	
+	private String diff;
+	private String ups;
+	private String downs;
 
 	private List<CommitFile> commitFiles;
 	private List<CommitComment> commitCommentList;
@@ -166,4 +170,28 @@ public class Commit {
 		this.listCommitDowns = listCommitDowns;
 	}
 
+	public String getDiff() {
+		return diff;
+	}
+
+	public void setDiff(String diff) {
+		this.diff = diff;
+	}
+
+	public String getUps() {
+		return ups;
+	}
+
+	public void setUps(String ups) {
+		this.ups = ups;
+	}
+
+	public String getDowns() {
+		return downs;
+	}
+
+	public void setDowns(String downs) {
+		this.downs = downs;
+	}
+	
 }

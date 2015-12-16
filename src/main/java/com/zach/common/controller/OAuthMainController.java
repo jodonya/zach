@@ -8,10 +8,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHCommit.File;
@@ -29,8 +32,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -46,6 +52,7 @@ import com.zach.model.Commit;
 import com.zach.model.CommitComment;
 import com.zach.model.CommitDown;
 import com.zach.model.CommitFile;
+import com.zach.model.CommitJsonObject;
 import com.zach.model.CommitUp;
 import com.zach.model.UserLogin;
 import com.zach.model.UserProfile;
@@ -104,7 +111,12 @@ public class OAuthMainController {
 			accessToken = getAccessToken(code, accessToken);
 
 		}
-
+		
+		if (accessToken == null){
+			model.addAttribute("code", "");
+			return "redirect:/";
+		}
+			
 		// Now get the email address
 		String email = null;
 
@@ -264,7 +276,7 @@ public class OAuthMainController {
 		Long countCommits = commitRepository.count();
 		model.addAttribute("count", countCommits);
 		model.addAttribute("listTheCommits", commitRepository.findAll());
-		model.addAttribute("email", email);
+		model.addAttribute("email", StringEscapeUtils.escapeJavaScript(email));
 		
 		if (getClientId() != null)
 			model.addAttribute("clientId", getClientId());
@@ -301,9 +313,12 @@ public class OAuthMainController {
 		System.out.println("RRRRR Response " + responseMessage);
 
 		JSONObject json = new JSONObject(responseMessage);
-
+		try{
 		if (json.get("access_token") != null)
 			accessToken = json.getString("access_token").trim();
+		} catch (JSONException e){
+			return null;
+		}
 		
 		return accessToken;
 	}
@@ -1108,6 +1123,121 @@ public class OAuthMainController {
 
 		return "OAuthMainPage";
 
+	}
+	
+	/****
+	 * 
+	 * An attempt at Paging Commits Starts Here
+	 * */
+	@RequestMapping(value = "/springPaginationDataTables.web/{email}/", method = RequestMethod.GET, produces = "application/json")
+    public @ResponseBody String springPaginationDataTables(HttpServletRequest  request, @PathVariable("email") String email) throws IOException {
+		
+    	//Fetch the page number from client
+    	Integer pageNumber = 0;
+    	if (null != request.getParameter("iDisplayStart"))
+    		pageNumber = (Integer.valueOf(request.getParameter("iDisplayStart"))/10)+1;		
+    	
+    	//Fetch search parameter
+    	String searchParameter = request.getParameter("sSearch");
+    	
+    	//Fetch Page display length
+    	Integer pageDisplayLength = Integer.valueOf(request.getParameter("iDisplayLength"));
+    	
+    	//Create page list data
+    	List<Commit> personsList = createPaginationData(pageDisplayLength);
+		
+		//Here is server side pagination logic. Based on the page number you could make call 
+		//to the data base create new list and send back to the client. For demo I am shuffling 
+		//the same list to show data randomly
+		if (pageNumber == 1) {
+			Collections.shuffle(personsList);
+		}else if (pageNumber == 2) {
+			Collections.shuffle(personsList);
+		}else {
+			Collections.shuffle(personsList);
+		}
+		
+		//Search functionality: Returns filtered list based on search parameter
+		personsList = getListBasedOnSearchParameter(searchParameter,personsList, email);
+		
+		
+		CommitJsonObject commitJsonObject = new CommitJsonObject();
+		//Set Total display record
+		commitJsonObject.setiTotalDisplayRecords(500);
+		//Set Total record
+		commitJsonObject.setiTotalRecords(500);
+		commitJsonObject.setAaData(personsList);
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String json2 = gson.toJson(commitJsonObject);
+	
+		return json2;
+    }
+
+	private List<Commit> getListBasedOnSearchParameter(String searchParameter,List<Commit> personsList, String email) {
+		
+		if (null != searchParameter && !searchParameter.equals("")) {
+			List<Commit> personsListForSearch = new ArrayList<Commit>();
+			searchParameter = searchParameter.toUpperCase();
+			for (Commit commit : personsList) {
+				
+				if (commit.getLogin().toUpperCase().indexOf(searchParameter)!= -1 || commit.getRepository().toUpperCase().indexOf(searchParameter)!= -1
+						) {
+					
+					int upLength = 0;
+					if (commit.getListCommitUps() != null)
+					upLength = commit.getListCommitUps().size();
+					int downLength = 0;
+					if (commit.getListCommitDowns() != null)
+					downLength = commit.getListCommitDowns().size();				
+//					commit.setDiff("Diff - "+commit.getHash());
+//					commit.setUps("Ups - "+commit.getHash());
+//					commit.setDowns("Downs - "+commit.getHash());
+					commit.setDiff("<a href=\"/diff/"+commit.getHash()+"/"+email+"/\">Diff</a>");
+					commit.setUps("<a href=\"/up/"+commit.getHash()+"/"+email+"/\">+1 "+upLength+" Ups</a>");
+					commit.setDowns("<a href=\"/down/"+commit.getHash()+"/"+email+"/\">-1"+downLength+" Downs</a>");
+
+					personsListForSearch.add(commit);					
+				}
+				
+			}
+			personsList = personsListForSearch;
+			personsListForSearch = null;
+		}
+		
+		List<Commit> personsListForSearch = new ArrayList<Commit>();
+		for (Commit commit : personsList) {
+			
+			int upLength = 0;
+				if (commit.getListCommitUps() != null)
+				upLength = commit.getListCommitUps().size();
+			int downLength = 0;
+			if (commit.getListCommitDowns() != null)
+				downLength = commit.getListCommitDowns().size();
+			
+//			commit.setDiff("<a href=\"/diff/"+commit.getHash()+"/"+email+">Diff</a>");
+//			commit.setUps("<a href=\"/up/"+commit.getHash()+"/"+email+">+1 "+upLength+"</a>");
+//			commit.setDowns("<a href=\"/down/"+commit.getHash()+"/"+email+">-1"+downLength+"</a>");
+			
+			commit.setLogin("<a href=\"/usercommits/"+commit.getLogin()+"/\"> "+commit.getLogin()+" Commits</a>");
+			commit.setRepository("<a href=\"/repositorycommits/"+commit.getRepository()+"/\"> "+commit.getRepository()+" Commits</a>");
+
+			
+			commit.setDiff("<a href=\"/diff/"+commit.getHash()+"/"+email+"/\">Diff</a>");
+			commit.setUps("<a href=\"/up/"+commit.getHash()+"/"+email+"/\">+1 "+upLength+" Ups</a>");
+			commit.setDowns("<a href=\"/down/"+commit.getHash()+"/"+email+"/\">-1"+downLength+" Downs</a>");
+
+			personsListForSearch.add(commit);
+			
+		}
+		personsList = personsListForSearch;
+		
+		return personsList;
+	}
+
+	private List<Commit> createPaginationData(Integer pageDisplayLength) {
+		
+		return commitRepositoryCustom.getCommits(pageDisplayLength.longValue());
 	}
 
 }
