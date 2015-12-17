@@ -4,13 +4,13 @@
 	pageEncoding="UTF-8"%>
 <html>
 <body>
-<div>
-<div><h4>Diff User Mail: ${email}</h1></div>
-<div><a href="<c:out value="/logout"/>"> Logout</a> </h1></div>
-</div>
-<div><a href="<c:out value="/myprofile/${email}/"/>"> Profile</a> </h1></div>
 
-<div><a href="<c:out value="/login/"/>"> Home</a> </h1></div>
+<div>
+<div><h1>Welcome : ${email}</h1></div>
+<div><a href="<c:out value="/login/"/>"> Home</a> | <a href="<c:out value="/logout"/>"> Logout</a>| <a href="<c:out value="/myprofile/${email}/"/>"> Profile</a> |
+ <a href="<c:out value="/userprofiles/${email}/"/>"> User Profiles (Admin)</a> | <a href="<c:out value="/clientprofile/${clientId}/"/>"> Client Profile</a> | <a href="<c:out value="/pullcommits"/>"> Pull Commits</a> </div>
+</div>
+
 <div style="clear:both;"></div>
 <h4> </h4>
 

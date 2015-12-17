@@ -439,6 +439,8 @@ public class OAuthMainController {
 			// Go back to the main page
 			model.addAttribute(new UserLogin());
 			// return "main";
+			
+			model.addAttribute("queryType", "maintype");
 			return "GitOAuthPage";
 		}
 
@@ -469,6 +471,7 @@ public class OAuthMainController {
 		// model.addAttribute("theFiles", commit.getCommitFiles());
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("userLogin", model.get("userLogin"));
+		model.addAttribute("queryType", "maintype");
 		return "OAuthMainPage";
 
 	}
@@ -514,6 +517,7 @@ public class OAuthMainController {
 		// model.addAttribute("theFiles", commit.getCommitFiles());
 		model.addAttribute("listTheCommits", commitRepository.findAll());
 		model.addAttribute("userLogin", model.get("userLogin"));
+		model.addAttribute("queryType", "maintype");
 
 		return "OAuthMainPage";
 
@@ -1158,13 +1162,13 @@ public class OAuthMainController {
 		//Here is server side pagination logic. Based on the page number you could make call 
 		//to the data base create new list and send back to the client. For demo I am shuffling 
 		//the same list to show data randomly
-		if (pageNumber == 1) {
-			Collections.shuffle(personsList);
-		}else if (pageNumber == 2) {
-			Collections.shuffle(personsList);
-		}else {
-			Collections.shuffle(personsList);
-		}
+//		if (pageNumber == 1) {
+//			Collections.shuffle(personsList);
+//		}else if (pageNumber == 2) {
+//			Collections.shuffle(personsList);
+//		}else {
+//			Collections.shuffle(personsList);
+//		}
 		
 		//Search functionality: Returns filtered list based on search parameter
 		personsList = getListBasedOnSearchParameter(searchParameter,personsList, email);
@@ -1281,13 +1285,13 @@ public class OAuthMainController {
 		//Here is server side pagination logic. Based on the page number you could make call 
 		//to the data base create new list and send back to the client. For demo I am shuffling 
 		//the same list to show data randomly
-		if (pageNumber == 1) {
-			Collections.shuffle(commitsList);
-		}else if (pageNumber == 2) {
-			Collections.shuffle(commitsList);
-		}else {
-			Collections.shuffle(commitsList);
-		}
+//		if (pageNumber == 1) {
+//			Collections.shuffle(commitsList);
+//		}else if (pageNumber == 2) {
+//			Collections.shuffle(commitsList);
+//		}else {
+//			Collections.shuffle(commitsList);
+//		}
 		
 		//Search functionality: Returns filtered list based on search parameter
 		commitsList = getListBasedOnSearchParameter(searchParameter,commitsList, email);
@@ -1329,13 +1333,13 @@ public class OAuthMainController {
 		//Here is server side pagination logic. Based on the page number you could make call 
 		//to the data base create new list and send back to the client. For demo I am shuffling 
 		//the same list to show data randomly
-		if (pageNumber == 1) {
-			Collections.shuffle(commitsList);
-		}else if (pageNumber == 2) {
-			Collections.shuffle(commitsList);
-		}else {
-			Collections.shuffle(commitsList);
-		}
+		// if (pageNumber == 1) {
+		// Collections.shuffle(commitsList);
+		// }else if (pageNumber == 2) {
+		// Collections.shuffle(commitsList);
+		// }else {
+		// Collections.shuffle(commitsList);
+		// }
 		
 		//Search functionality: Returns filtered list based on search parameter
     	commitsList = getListBasedOnSearchParameter(searchParameter,commitsList, email);
