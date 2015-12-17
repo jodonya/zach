@@ -281,6 +281,9 @@ public class OAuthMainController {
 		if (getClientId() != null)
 			model.addAttribute("clientId", getClientId());
 		model.addAttribute("accessToken", accessToken);
+		
+		model.addAttribute("queryType", "maintype");
+		
 		return "OAuthMainPage";
 	}
 
@@ -421,6 +424,7 @@ public class OAuthMainController {
 
 		model.addAttribute(newCommitComment);
 
+		model.addAttribute("queryType", "difftype");
 		return "DiffPage";
 
 	}
@@ -759,6 +763,7 @@ public class OAuthMainController {
 			model.addAttribute(new UserProfile());
 			// return "main";
 			// return "GitOAuthPage";
+		
 			return "redirect:/logout";
 		}
 
@@ -1100,8 +1105,11 @@ public class OAuthMainController {
 		Long countCommits = commitRepositoryCustom.countCommits(login);
 		model.addAttribute("count", countCommits);
 		model.addAttribute("listTheCommits", commitRepositoryCustom.getCommits(login));
-		
+		model.addAttribute("queryType", "usertype");
+		model.addAttribute("login", login);
 
+		
+		///springPaginationDataTables.login/${login}/
 		return "OAuthMainPage";
 
 	}
@@ -1118,9 +1126,10 @@ public class OAuthMainController {
 
 		Long countCommits = commitRepositoryCustom.countCommitsGivenRepository(repository);
 		model.addAttribute("count", countCommits);
-		model.addAttribute("listTheCommits", commitRepositoryCustom.getCommitsGivenRepository(repository));
-		
+		model.addAttribute("listTheCommits", commitRepositoryCustom.getCommitsGivenRepository(repository));		
 
+		model.addAttribute("queryType", "repositorytype");
+		model.addAttribute("repository", repository);
 		return "OAuthMainPage";
 
 	}
@@ -1163,9 +1172,9 @@ public class OAuthMainController {
 		
 		CommitJsonObject commitJsonObject = new CommitJsonObject();
 		//Set Total display record
-		commitJsonObject.setiTotalDisplayRecords(500);
+		commitJsonObject.setiTotalDisplayRecords(Long.valueOf(commitRepository.count()).intValue());
 		//Set Total record
-		commitJsonObject.setiTotalRecords(500);
+		commitJsonObject.setiTotalRecords(Long.valueOf(commitRepository.count()).intValue());
 		commitJsonObject.setAaData(personsList);
 		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -1239,5 +1248,110 @@ public class OAuthMainController {
 		
 		return commitRepositoryCustom.getCommits(pageDisplayLength.longValue());
 	}
+	
+	private List<Commit> createPaginationData( String login, Integer pageDisplayLength) {
+		
+		return commitRepositoryCustom.getCommits(login, pageDisplayLength.longValue());
+	}
+	
+	private List<Commit> createPaginationDataRepository( String repository, Integer pageDisplayLength) {
+		
+		return commitRepositoryCustom.getCommitsGivenRepository(repository, pageDisplayLength.longValue());
+				
+				//.getCommits(login, pageDisplayLength.longValue());
+	}
+	///springPaginationDataTables.login/${login}/
+	@RequestMapping(value = "/springPaginationDataTables.login/{email}/{login}/", method = RequestMethod.GET, produces = "application/json")
+    public @ResponseBody String springPaginationDataTablesLogin(HttpServletRequest  request,@PathVariable("email") String email, @PathVariable("login") String login) throws IOException {
+		
+    	//Fetch the page number from client
+    	Integer pageNumber = 0;
+    	if (null != request.getParameter("iDisplayStart"))
+    		pageNumber = (Integer.valueOf(request.getParameter("iDisplayStart"))/10)+1;		
+    	
+    	//Fetch search parameter
+    	String searchParameter = request.getParameter("sSearch");
+    	
+    	//Fetch Page display length
+    	Integer pageDisplayLength = Integer.valueOf(request.getParameter("iDisplayLength"));
+    	
+    	//Create page list data
+    	List<Commit> commitsList = createPaginationData(login,pageDisplayLength);
+		
+		//Here is server side pagination logic. Based on the page number you could make call 
+		//to the data base create new list and send back to the client. For demo I am shuffling 
+		//the same list to show data randomly
+		if (pageNumber == 1) {
+			Collections.shuffle(commitsList);
+		}else if (pageNumber == 2) {
+			Collections.shuffle(commitsList);
+		}else {
+			Collections.shuffle(commitsList);
+		}
+		
+		//Search functionality: Returns filtered list based on search parameter
+		commitsList = getListBasedOnSearchParameter(searchParameter,commitsList, email);
+		
+		
+		CommitJsonObject commitJsonObject = new CommitJsonObject();
+		//Set Total display record
+		commitJsonObject.setiTotalDisplayRecords(Long.valueOf(commitRepositoryCustom.countCommits(login)).intValue());
+		//Set Total record
+		commitJsonObject.setiTotalRecords(Long.valueOf(commitRepositoryCustom.countCommits(login)).intValue());
+		commitJsonObject.setAaData(commitsList);
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String json2 = gson.toJson(commitJsonObject);
+	
+		return json2;
+    }
+	
+	// /springPaginationDataTables.repository/${email}/${repository}/
+	
+	//springPaginationDataTables.repository/${email}/${repository}/
+	@RequestMapping(value = "springPaginationDataTables.repository/{email}/{repository}/", method = RequestMethod.GET, produces = "application/json")
+    public @ResponseBody String springPaginationDataTablesRepository(HttpServletRequest  request,@PathVariable("email") String email, @PathVariable("repository") String repository) throws IOException {
+		
+    	//Fetch the page number from client
+    	Integer pageNumber = 0;
+    	if (null != request.getParameter("iDisplayStart"))
+    		pageNumber = (Integer.valueOf(request.getParameter("iDisplayStart"))/10)+1;		
+    	
+    	//Fetch search parameter
+    	String searchParameter = request.getParameter("sSearch");
+    	
+    	//Fetch Page display length
+    	Integer pageDisplayLength = Integer.valueOf(request.getParameter("iDisplayLength"));
+    	
+    	//Create page list data
+    	List<Commit> commitsList = createPaginationDataRepository(repository,pageDisplayLength);
+		
+		//Here is server side pagination logic. Based on the page number you could make call 
+		//to the data base create new list and send back to the client. For demo I am shuffling 
+		//the same list to show data randomly
+		if (pageNumber == 1) {
+			Collections.shuffle(commitsList);
+		}else if (pageNumber == 2) {
+			Collections.shuffle(commitsList);
+		}else {
+			Collections.shuffle(commitsList);
+		}
+		
+		//Search functionality: Returns filtered list based on search parameter
+    	commitsList = getListBasedOnSearchParameter(searchParameter,commitsList, email);
+		
+		
+		CommitJsonObject commitJsonObject = new CommitJsonObject();
+		//Set Total display record
+		commitJsonObject.setiTotalDisplayRecords(Long.valueOf(commitRepositoryCustom.countCommitsGivenRepository(repository)).intValue());
+		//Set Total record
+		commitJsonObject.setiTotalRecords(Long.valueOf(commitRepositoryCustom.countCommitsGivenRepository(repository)).intValue());
+		commitJsonObject.setAaData(commitsList);
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String json2 = gson.toJson(commitJsonObject);
+	
+		return json2;
+    }
 
 }

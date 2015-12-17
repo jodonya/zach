@@ -28,8 +28,23 @@
 		};
 	};
 
-$(document).ready(function() {
+	
 
+		// '${queryType}';
+	//alert(queryType);
+	
+$(document).ready(function() {
+	//queryType
+	// for main maintype
+	//for a user usertype
+	//for a repository repositorytype
+	//for add comment commenttype
+	//for diff difftype
+	var queryType = "<c:out value="${queryType}"/>";
+
+	//for maintype
+	 if (queryType == "maintype"){
+	
 	$("#example").dataTable( {
         "bProcessing": true,
         "bServerSide": true,
@@ -45,8 +60,13 @@ $(document).ready(function() {
             //for the first page you will see 0 second page 1 third page 2...
             //Un-comment below alert to see page number
         	//alert("Current page number: "+this.fnPagingInfo().iPage);    
-        },         
-        "sAjaxSource": "/springPaginationDataTables.web/${email}/",
+        },  
+
+       
+            "sAjaxSource": "/springPaginationDataTables.web/${email}/",
+               
+
+        
         "aoColumns": [
             { "mData": "message" },
             { "mData": "login" },
@@ -57,6 +77,86 @@ $(document).ready(function() {
              
         ]
     } );
+
+	 }
+
+
+	//for user or author commits
+		if (queryType == "usertype"){
+			$("#example").dataTable( {
+		        "bProcessing": true,
+		        "bServerSide": true,
+		        "sort": "position",
+		        //bStateSave variable you can use to save state on client cookies: set value "true" 
+		        "bStateSave": false,
+		        //Default: Page display length
+		        "iDisplayLength": 20,
+		        //We will use below variable to track page number on server side(For more information visit: http://legacy.datatables.net/usage/options#iDisplayStart)
+		        "iDisplayStart": 0,
+		        "fnDrawCallback": function () {
+		            //Get page numer on client. Please note: number start from 0 So
+		            //for the first page you will see 0 second page 1 third page 2...
+		            //Un-comment below alert to see page number
+		        	//alert("Current page number: "+this.fnPagingInfo().iPage);    
+		        },  
+
+		       
+	            "sAjaxSource": "/springPaginationDataTables.login/${email}/${login}/",
+		               
+
+		        
+		        "aoColumns": [
+		            { "mData": "message" },
+		            { "mData": "login" },
+		            { "mData": "repository" },
+		            { "mData": "diff" },
+		            { "mData": "ups" },
+		            { "mData": "downs" },
+		             
+		        ]
+		    } );
+
+			 }
+
+
+	//for diff
+		if (queryType == "repositorytype"){
+			$("#example").dataTable( {
+		        "bProcessing": true,
+		        "bServerSide": true,
+		        "sort": "position",
+		        //bStateSave variable you can use to save state on client cookies: set value "true" 
+		        "bStateSave": false,
+		        //Default: Page display length
+		        "iDisplayLength": 20,
+		        //We will use below variable to track page number on server side(For more information visit: http://legacy.datatables.net/usage/options#iDisplayStart)
+		        "iDisplayStart": 0,
+		        "fnDrawCallback": function () {
+		            //Get page numer on client. Please note: number start from 0 So
+		            //for the first page you will see 0 second page 1 third page 2...
+		            //Un-comment below alert to see page number
+		        	//alert("Current page number: "+this.fnPagingInfo().iPage);    
+		        },  
+
+		       
+		            "sAjaxSource": "/springPaginationDataTables.repository/${email}/${repository}/",
+		               
+
+		        
+		        "aoColumns": [
+		            { "mData": "message" },
+		            { "mData": "login" },
+		            { "mData": "repository" },
+		            { "mData": "diff" },
+		            { "mData": "ups" },
+		            { "mData": "downs" },
+		             
+		        ]
+		    } );
+
+			 }
+
+		 
 
 } );
 

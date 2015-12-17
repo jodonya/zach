@@ -135,7 +135,6 @@ public class CommitRepositoryImp implements CommitRepositoryCustom {
 		
 		listCommits = (List<Commit>) mongoTemplate.find(new Query(Criteria
 				.where("repository").is(repository)).limit(limit.intValue()), Commit.class, "commits");
-		
 		return listCommits;
 	}
 	
